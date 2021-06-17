@@ -1,0 +1,12 @@
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwNWM4NjExNTQ1NGY0MTM2ODRhNTdjYSIsImlhdCI6MTYxNjc2MjUxNiwiZXhwIjoxNjE3MTA4MTE2fQ.p-Xs9ZWnpgxOUaJFUfLNNRRwdYSNpplE-Xy-wKz6FtI
+@deviceId = 1
+@ip = localhost:4000
+@username = ""
+@password = ""
+
+
+GET http://{{ip}}/users/register HTTP/1.1
+content-type: application/json
+Authorization: Basic {{username}}:{{password}}
+
