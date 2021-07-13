@@ -3,14 +3,16 @@ from django.contrib.auth.models import AbstractUser
 import bson
 import re
 # Create your models here.
+
+# converter cpf para string sem pontuação
 cpfConverter = lambda cpf: ''.join(re.findall("\d", cpf))
 
 class User(AbstractUser, models.Model):
-    # id = models.(primary_key=True,default=bson.objectid.ObjectId())
     cpf = models.CharField(max_length=20)
     vtr = models.IntegerField(default=None, blank=True)
     name=models.CharField(max_length=300)
 
+    # validar cpf
     def cpfValidator(self,cpf:str):
         cpf = cpfConverter(cpf)
         if len(cpf)!=11:
