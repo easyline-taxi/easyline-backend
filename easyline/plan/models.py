@@ -8,4 +8,4 @@ class Plan(models.Model):
     name = models.CharField(max_length=200)
     value  = models.IntegerField()
     on_created = models.DateField(default=timezone.now())
-    permissions = models.JSONField(default={"max_users": 10})
+    permissions = models.JSONField(default={"permissions": []})

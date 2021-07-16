@@ -7,8 +7,8 @@ from plan.models import Plan
 
 class Point(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
-    local = models.JSONField(default='{}')
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE, null=True)
+    local = models.JSONField(default={"local": []})
     name = models.CharField(max_length=200)
-    employees = models.JSONField(default='{}')
-    historic = models.JSONField(default='{}')
+    employee = models.JSONField(default={"employee": []})
+    historic = models.JSONField(default={"historic": []})
