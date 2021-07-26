@@ -19,8 +19,8 @@ from rest_framework_jwt.views import obtain_jwt_token,refresh_jwt_token,verify_j
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', obtain_jwt_token, name='token_obtain_pair'),
-    path('refresh/',refresh_jwt_token, name='token_refresh'),
-    path('verify/', verify_jwt_token, name='token_verify'),
-    path('',include('api.urls'))
+    path('api/login/', obtain_jwt_token, name='token_obtain_pair'),
+    path('api/refresh/',refresh_jwt_token, name='token_refresh'),
+    path('api/verify/', verify_jwt_token, name='token_verify'),
+    path('api/',include('api.urls'))
 ]

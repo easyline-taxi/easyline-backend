@@ -37,10 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'plan',
-    'user',
-    'point',
     'rest_framework',
+    'api',
+    'channels'
+    
 ]
 
 from datetime import timedelta
@@ -104,6 +104,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'easyline.wsgi.application'
+# 
+ASGI_APPLICATION = "easyline.asgi.application"
+# 
+
+
 
 
 # Database
@@ -161,7 +166,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = 'api.User'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
