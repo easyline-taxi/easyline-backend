@@ -6,3 +6,4 @@ channels
 Gunicorn
 pymongo[srv]
 python-dotenv
+daphne
