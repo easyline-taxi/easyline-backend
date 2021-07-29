@@ -1,12 +1,12 @@
 from rest_framework import permissions
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, status
-from ..models import User,Point
 from rest_framework.response import Response
 from .serializer import UserSerializerPut,UserSerializer
 from rest_framework.views import APIView
 
-# Create your views here.
+# ! Import From App
+from api.models import User,Point
 
 class UserDataView(APIView):
     serializer_class= UserSerializer
