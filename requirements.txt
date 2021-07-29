@@ -3,3 +3,6 @@ djangorestframework
 djangorestframework-jwt
 djongo
 channels
+Gunicorn
+pymongo[srv]
+python-dotenv

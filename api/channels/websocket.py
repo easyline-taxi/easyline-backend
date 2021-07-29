@@ -1,5 +1,5 @@
 from channels.generic.websocket import WebsocketConsumer
-
+from channels.db import database_sync_to_async
 
 # class MyConsumer(WebsocketConsumer):
 #     groups = ["broadcast"]
@@ -40,18 +40,18 @@ class ChatConsumer(WebsocketConsumer):
             else:
                 raise Exception("Usuário Inválido")
         except Exception as exe:
-            print(exe)
-            self.send(text_data="User not authenticated")
+            self.close(message=exe)
             # self.disconnect()
     
             
 
-    def receive(self, *, text_data):
+    def receive(self, text_data=None,bytes_data=None ):
         if text_data.startswith("/name"):
-            self.username = text_data[5:].strip()
-            self.send(text_data="[set your username to %s]" % self.username)
+            self.user.username = text_data[5:].strip()
+            self.send(text_data="[set your username to %s]" % self.user.username)
         else:
             self.send(text_data=self.username + ": " + text_data)
 
     def disconnect(self, message):
+        self.send(message)
         pass

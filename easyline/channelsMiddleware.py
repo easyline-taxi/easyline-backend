@@ -9,9 +9,12 @@ from api.models import User
 @database_sync_to_async
 def get_user(user_id):
     try:
-        return User.objects.get(id=user_id)
+        user = User.objects.get(id=user_id)
+        if user.active:
+            return user
     except User.DoesNotExist:
-        return None
+        pass
+    return None
 
 class TokenAuthMiddleware:
     """
