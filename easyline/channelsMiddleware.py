@@ -1,5 +1,7 @@
+
+
 from django.db import close_old_connections
-from django.conf import settings
+# from django.conf import settings
 from urllib.parse import parse_qs
 # rest framework
 from rest_framework_jwt.utils import jwt_decode_handler
@@ -10,7 +12,7 @@ from api.models import User
 def get_user(user_id):
     try:
         user = User.objects.get(id=user_id)
-        if user.active:
+        if user != None and user.active:
             return user
     except User.DoesNotExist:
         pass
