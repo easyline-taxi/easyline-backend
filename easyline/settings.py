@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 from dotenv import dotenv_values
 config = dotenv_values('.env')
-
+if not config.get('HOST'):
+    config['HOST'] = "mongodb://localhost:27017/"
 if not config.get('DATABASENAME'):
     config['DATABASENAME'] = 'easyline'
 if not config.get('PORT'):
@@ -66,8 +67,8 @@ JWT_AUTH = {
     'JWT_LEEWAY': 0,
     'JWT_EXPIRATION_DELTA': timedelta(days=15),
 
-    'JWT_ALLOW_REFRESH': False,
-    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=15),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=0),
 
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     'JWT_AUTH_COOKIE': None,
@@ -184,7 +185,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+MEDIA_URL= '/media/'
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 
 AUTH_USER_MODEL = 'api.User'
 

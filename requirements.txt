@@ -7,3 +7,4 @@ Gunicorn
 pymongo[srv]
 python-dotenv
 daphne
+Pillow

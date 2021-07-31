@@ -9,6 +9,13 @@ import re
 
 # converter cpf para string sem pontuação
 cpfConverter = lambda cpf: ''.join(re.findall("\d", cpf))
+
+def user_directory_path(instance, filename):
+#     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+#     print(instance)
+#     print(filename)
+#     return 'images/user_{0}'.format(filename)
+    return 'user_{0}/{1}'.format(instance.user.id, filename)
 class User(AbstractUser,models.Model):
     # TODO: Dados armazenados dos usuários
 
@@ -22,6 +29,7 @@ class User(AbstractUser,models.Model):
     name = models.CharField(max_length=300, blank=True)
     city = models.CharField(max_length=100, blank= True, null=True)
     country = models.CharField(max_length=100, blank= True, null=True)
+    photo = models.ImageField('photo',upload_to='images/',null=True)
 
     # ? Validação do CPF
     def cpfValidator(self,cpf:str):
