@@ -22,6 +22,7 @@ if not config.get('USERDB'):
 if not config.get('PASSDB'):
     config['PASSDB'] = ''
 
+
 import os
 from pathlib import Path
 
