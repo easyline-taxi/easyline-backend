@@ -88,6 +88,13 @@ class UserDataView(APIView):
             # ? Senão retorna erro 404
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self,request,format=None):
+        # TODO: Deleta o usuário
+        try:
+            request.user.delete()
+            return Response({"message":"Deleted Sucessful" })
+        except Exception as ex:
+            return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
 
        

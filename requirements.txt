@@ -8,3 +8,5 @@ pymongo[srv]
 python-dotenv
 daphne
 Pillow
+discord
+cogwatch
