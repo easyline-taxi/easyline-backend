@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, status
+from django.utils.translation import gettext as _
 from rest_framework.response import Response
 from .serializer import UserSerializerPut,UserSerializer
 from rest_framework.views import APIView

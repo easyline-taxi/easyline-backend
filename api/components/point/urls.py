@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
     # TODO: Actions do ponto
     # ? Criar ponto
-    path('register/', views.PointRegister),
+    path('register/', views.PointRegister.as_view()),
     
     # ? Pegar pontos
     # ? Deletar ponto

@@ -105,14 +105,14 @@ class PointRow(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     
     # ? Posição em que se encontrava, se null é pq saiu da Fila
-    position = models.IntegerField(null=True)
+    position = models.IntegerField()
     date = models.DateTimeField(default = timezone.now)
 
     # ? Se o ping websocket está ativo
-    online = models.BooleanField(default = False)
+    online = models 
 
     def __str__(self):
-        return str(self.position)+" "+self.user_id
+        return str(self.position)+" "+str(self.user_id)
 
 class PointEmployee(models.Model):
     # TODO: Listar os usuários que fazem parte de um ponto
@@ -120,7 +120,7 @@ class PointEmployee(models.Model):
     point = models.ForeignKey(Point, on_delete=models.CASCADE)
 
     # ? ID do Usuário  
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     # ? Função - Admin e motorista
     function = models.CharField(max_length=300,default="Motorista")
