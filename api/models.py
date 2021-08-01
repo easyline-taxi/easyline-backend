@@ -31,6 +31,10 @@ class User(AbstractUser,models.Model):
     country = models.CharField(max_length=100, blank= True, null=True)
     photo = models.ImageField('photo',upload_to='images/',null=True)
 
+    # ? Ponto sendo trabalhado
+
+    point_id=models.IntegerField(null=True)
+
     # ? Validação do CPF
     def cpfValidator(self,cpf:str):
         cpf = cpfConverter(cpf)
@@ -78,7 +82,7 @@ class Historic(models.Model):
     motive = models.CharField(max_length=300)
 
     # ? usuário que foi afetado
-    suject = models.ForeignKey(User, on_delete=models.PROTECT)
+    suject = models.ForeignKey(User, on_delete=models.SET_DEFAULT , default=None, null=True)
 
      # ? Data em que ocorreu
     date = models.DateTimeField(default=timezone.now)
@@ -89,11 +93,11 @@ class Historic(models.Model):
 class HistoricPoint(Historic):
     # TODO: Dados referente ao historico do Point
     # ? ponto em que foi realizado
-    point = models.ForeignKey(Point, on_delete=models.PROTECT)
+    point = models.ForeignKey(Point, on_delete=models.CASCADE)
 class HistoricUser(Historic):
     # TODO: Dados referente ao historico do User
     # ? usuário que foi realizado uma função
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.SET_DEFAULT , default=None, null=True)
 
 class PointRow(models.Model):
     # TODO Descrição das filas
@@ -109,7 +113,8 @@ class PointRow(models.Model):
     date = models.DateTimeField(default = timezone.now)
 
     # ? Se o ping websocket está ativo
-    online = models 
+    online = models.BooleanField(default=False)
+
 
     def __str__(self):
         return str(self.position)+" "+str(self.user_id)
@@ -123,13 +128,13 @@ class PointEmployee(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     # ? Função - Admin e motorista
-    function = models.CharField(max_length=300,default="Motorista")
+    function = models.CharField(max_length=300,default="motorista")
 
     # ? Caso o dono do ponto queira desligar do sistema
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return str(self.user_id)+" "+str(self.active)
+        return str(self.user_id)+" "+str(self.active)+" - "+self.function
 
 
 

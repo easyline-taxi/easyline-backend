@@ -10,3 +10,9 @@ class PointRegisterSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Point
         fields = ['name','plan','city','country']
+
+class PointActions(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Point
+        fields = ['name','plan','city','country']
+

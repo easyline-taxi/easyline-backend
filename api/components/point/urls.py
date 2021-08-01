@@ -6,9 +6,13 @@ urlpatterns = [
     # ? Criar ponto
     path('register/', views.PointRegister.as_view()),
     
-    # ? Pegar pontos
+    # ? Pegar pontos 
+    path('', views.PointUserAction.as_view()),
+
     # ? Deletar ponto
     # ? Transferir ponto
+    path('config/', views.PointOwnerAction.as_view()),
+    
     # ? adicionar user no ponto
     # ? Remover user do ponto
 

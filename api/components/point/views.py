@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from rest_framework.response import Response
 
 # ! Imports do APP
-from api.models import Point,PointEmployee,HistoricPoint,HistoricUser
+from api.models import Point, PointEmployee, HistoricPoint, HistoricUser
 
 # class PointGerals(viewsets.ViewSet):
 #     serializer_class = None
@@ -28,9 +28,8 @@ from api.models import Point,PointEmployee,HistoricPoint,HistoricUser
 #         pass
 
 
-
 class PointRegister(APIView):
-    serializer_class= PointRegisterSerializer
+    serializer_class = PointRegisterSerializer
 
     def post(self, request, format=None):
         # TODO Criar um ponto vinculado ao usuário
@@ -41,44 +40,72 @@ class PointRegister(APIView):
             serializer.is_valid(raise_exception=True)
             print(serializer.data)
 
-             # ? Cria o ponto
-            point = Point.objects.create(owner=request.user, name=serializer.data.get('name',None), city=serializer.data.get('city',None) ,country=serializer.data.get('country',None), plan=serializer.data.get('plan',None) )
+            # ? Cria o ponto
+            point = Point.objects.create(owner=request.user, name=serializer.data.get('name', None), city=serializer.data.get(
+                'city', None), country=serializer.data.get('country', None), plan=serializer.data.get('plan', None))
             if point != None:
-                PointEmployee.objects.create(user=request.user,function="admin")
-                HistoricPoint.objects.create(point = point,suject=request.user,motive="Ponto fundado",action="fundacao")
-                HistoricUser.objects.create(user = request.user,suject=request.user,motive="Criou o ponto",action="fundacao")
-                PointEmployee.objects.create(user=request.user,point=point,function="admin")
-            return Response({"message": _("Point Created") , "data":{'name':point.name,"city":point.city,"country":point.country}})
+                HistoricPoint.objects.create(
+                    point=point, suject=request.user, motive="Ponto fundado", action="fundacao")
+                HistoricUser.objects.create(
+                    user=request.user, suject=request.user, motive="Criou o ponto", action="fundacao")
+                PointEmployee.objects.create(
+                    user=request.user, point=point, function="admin")
+            return Response({"message": _("Point Created"), "data": {'name': point.name, "city": point.city, "country": point.country}})
         except Exception as ex:
             return Response({"message": _(str(ex))}, status=status.HTTP_400_BAD_REQUEST)
 
-        # # ? se tiver o nome do ponto, vamos criar o ponto junto
-        # if name_of_point:
-            
-        #     # ? Verifica se o usuário foi realmente criado
-        #     if not user:
-        #         raise Exception('User Inválido')
 
-        #     # ? Inicio do processo de criação do ponto
-        #     try:
-        #         point = Point.objects.create(owner=user, name=name_of_point)
-                
-        #         # ? Adiciona os históricos
-        #         HistoricPoint.objects.create(point = point,suject=user,motive="Criação do Ponto",action="fundacao")
-        #         HistoricPoint.objects.create(point = point,suject=user,motive="Adicionado no Ponto",action="adicao")
-        #         HistoricUser.objects.create(user = user,suject=user,motive="Adicionado no Ponto",action="adicao")
-        #         PointEmployee.objects.create(user=user,function="admin")
+class PointUserAction (APIView):
+    # TODO: Ações user(comum)/point
 
-        #         # 
-        #         # salvar os modelos
-        #         # 
+    def get(self, request, format=None):
+        # TODO: Pega os pontos relacionado ao user
+        try:
+            pontos_trabalhados = PointEmployee.objects.filter(user=request.user)
+            return Response({"message": "Pontos Encontrados", "points": [
+                {
+                    "id": x.point.id,
+                    "name": x.point.name,
+                    "owner_id": x.point.owner.id,
+                    "onlines": PointEmployee.objects.filter(point=x.point).count(),
+                    "function": x.function
+                } for x in pontos_trabalhados]})
+        except Exception as ex:
+            return Response({"message": _(str(ex))}, status=status.HTTP_400_BAD_REQUEST)
 
-        #         point.save()
-        #         user.save()
-        #     except Exception as ex:
-        #         if point:
-        #             point.delete()
-        #         if user:
-        #             user.delete()
-        #         raise Exception(ex)
-        
+    def post(self, request, format=None):
+        # TODO: Deleitar qual ponto será ativado pelo usuário
+
+        # ! Validation deviceid
+        try:
+
+            pontos_trabalhados = PointEmployee.objects.all().filter(user=request.user)
+            ponto_selecionado = [
+                x for x in pontos_trabalhados if x.point.id == request.data.get('point')]
+            if ponto_selecionado != None:
+                request.user.point_id = ponto_selecionado[0].point.id
+                request.user.save()
+                return Response({"message": "Point Selected "+str(request.user.point_id)})
+        except Exception as ex:
+            return Response({"message": "Point does not exists " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PointOwnerAction(APIView):
+    def delete(self, request, format=None):
+        # TODO: Deletar o ponto
+        point = request.data.get('point')
+        print(">>> ", point)
+        if point == None:
+            return Response({"message": "Point is invalid " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
+        pontos_administrados = PointEmployee.objects.all().filter(
+            user=request.user, function="admin")
+        p = [x for x in pontos_administrados if x.point.id == point]
+        if len(p) == 1:
+            ponto = Point.objects.get(pk=p[0].point.id)
+            ponto.delete()
+            return Response({"message": "Point Deleted with Sucessful"})
+        return Response({"message": "Point does not exists: " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, format=None):
+        # TODO: Transferir o ponto
+        pass

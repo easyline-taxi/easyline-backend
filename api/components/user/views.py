@@ -91,8 +91,10 @@ class UserDataView(APIView):
 
     def delete(self,request,format=None):
         # TODO: Deleta o usuário
+        # ! Verificar a validade disso, pois acho que a conta não poderá ser excluida
         try:
-            request.user.delete()
+            user = User.objects.get(pk = request.user.id)
+            user.delete()
             return Response({"message":"Deleted Sucessful" })
         except Exception as ex:
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
