@@ -9,24 +9,26 @@ import base64
 import io
 from PIL import Image
 # ! Import From App
-from api.models import User,Point,PointEmployee
+from api.models import User,Point,PointEmployee,DeviceId,HistoricUser
 
 class UserDataView(APIView):
     serializer_class= UserSerializer
 
     def get(self, request, format=None):
-        #  TODO: Retorna os dados do usuário
+        #  ?: Retorna os dados do usuário
 
         # ? Verifica se o deviceId é correspondente ao usuário
-        # ! não tem necessidade
-        # if not str(request.user.deviceid) == str(request.data.get('deviceid')):
-        #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)
-
+        
+        # if not len(DeviceId.objects.filter(deviceid=request.user.deviceid)):
+        #     # ! se não tiver device id registrado neste user REGISTRAR OUTRO DEVICE ID NELE
+        #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)  
+        
+        device = DeviceId.objects.filter(user=request.user).order_by('-last_used')[0]
         # ? Procura os pontos trabalhados
-        pontos_trabalhados = PointEmployee.objects.all().filter(user=request.user)
-# request.META.get('HTTP_HOST')+
-        # _file = open(, 'rb')
-        b64iamge = None
+        pontos_trabalhados = PointEmployee.objects.filter(deviceid=device)
+        pontos_trabalhados = [x for x in pontos_trabalhados if x.deviceid.user == request.user]
+
+        b64image = None
         try:
 
             # ? get image
@@ -44,7 +46,7 @@ class UserDataView(APIView):
             output = io.BytesIO()
             image.save(output, format=image.format)
             b64 = base64.b64encode(output.getvalue()).decode('utf-8')
-            b64iamge = "data:image/"+image.format+";base64,"+b64
+            b64image = "data:image/"+image.format+";base64,"+b64
         except Exception as ex:
             pass
         
@@ -55,7 +57,7 @@ class UserDataView(APIView):
                     "vtr":request.user.vtr,
                     "name":request.user.name,
                     "email":request.user.email,
-                    "photo":b64iamge
+                    "photo":b64image
                 },
             "point_data": [
                 {
@@ -67,21 +69,25 @@ class UserDataView(APIView):
                 } for x in pontos_trabalhados]})
 
     def put(self,request, format=None):
-        # TODO: Atualiza os dados do usuário
+        # ?: Atualiza os dados do usuário
         
         # ? Verifica se o deviceId é correspondente ao usuário
-        if not str(request.user.deviceid) == str(request.data.get('deviceid')):
-            return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)
+        # ! Não precisa mais verificar deviceID
+        # if not str(request.user.deviceid) == str(request.data.get('deviceid')):
+        #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)
 
         # ? Aloca os campos necessários de acordo com o modelo 
         serializer = UserSerializerPut(data =request.data)
         try:
             # ? Verifica a validade dos campos
-            if not serializer.is_valid(raise_exception=True):
-                return Response({"message": "invalid data"}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
+                
             
             # ? Realiza o update dos dados
             user = serializer.update(request.user,serializer.validated_data)
+
+            # ? TODO: ADicionar no HIstorico do Usuário essas ALTERÇÔES
+            HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
 
             return Response({"message":"Update Sucessful" , "data":{'name':user.name,"email":user.email,"city":user.city,"country":user.country}})
         except Exception as ex:
@@ -90,7 +96,7 @@ class UserDataView(APIView):
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self,request,format=None):
-        # TODO: Deleta o usuário
+        # ?: Deleta o usuário
         # ! Verificar a validade disso, pois acho que a conta não poderá ser excluida
         try:
             user = User.objects.get(pk = request.user.id)

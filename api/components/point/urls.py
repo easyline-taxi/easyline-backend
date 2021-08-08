@@ -2,7 +2,7 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    # TODO: Actions do ponto
+    # ! TODO: Actions do ponto
     # ? Criar ponto
     path('register/', views.PointRegister.as_view()),
     
@@ -15,6 +15,7 @@ urlpatterns = [
     
     # ? adicionar user no ponto
     # ? Remover user do ponto
+    path('actions/', views.PointOwnerUserAction.as_view()),
 
 
     # TODO: Actions da Fila

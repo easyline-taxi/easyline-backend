@@ -17,11 +17,10 @@ def user_directory_path(instance, filename):
 #     return 'images/user_{0}'.format(filename)
     return 'user_{0}/{1}'.format(instance.user.id, filename)
 class User(AbstractUser,models.Model):
-    # TODO: Dados armazenados dos usuários
+    # ?: Dados armazenados dos usuários
 
     # ? Itens obrigatórios
     email= models.EmailField(max_length=254, unique=True)
-    deviceid= models.CharField(max_length=150,unique=True, default="00000000000")
     cpf = models.CharField(max_length=11, unique=True,default="00000000000")
 
     # ? Itens não obrigatórios
@@ -47,15 +46,25 @@ class User(AbstractUser,models.Model):
     def __str__(self):
         return self.email
 
+class DeviceId(models.Model):
+    deviceid= models.CharField(max_length=150, default="00000000000")
+    user= models.ForeignKey(User, on_delete=models.CASCADE)
+    last_used = models.DateTimeField(default=timezone.now)
+    create_at = models.DateTimeField(default=timezone.now)
+
+    
+    def __str__(self):
+        return str(self.deviceid)
+
 class Plan(models.Model):
-    # TODO Adição de Planos Futuros
+    # ? Adição de Planos Futuros
     name = models.CharField(default="Free", max_length=200)
     value  = models.IntegerField(default = 0)
     on_created = models.DateField(default=timezone.now)
     permissions = models.JSONField(default={})
 
 class Point(models.Model):
-    # TODO descrição do modelo de dados dos Pontos de Taxi
+    # ? descrição do modelo de dados dos Pontos de Taxi
 
     # ? Dono do ponto
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -73,10 +82,24 @@ class Point(models.Model):
         return self.name
 
 class Historic(models.Model):
-    # TODO: Histórico padronizado do usuário para armazenamento de ações
+    # ?: Histórico padronizado do usuário para armazenamento de ações
+
+    ACTIONS_HISTORIC ={
+        ("T","transferido"),
+        ("F","fundado"),
+        ("P","penalizado"),
+        ("EP","entrou no ponto"),
+        ("MB","movido para baixo"),
+        ("MC","movido para cima"),
+        ("ATT","atualizado"),
+        ("REM","removido"),
+        ("ADD","adicionado"),
+        ("TRI","tripulado"),
+
+    }
 
     # ? Ação realizada ex: ban, expulso, embarcado
-    action = models.CharField(max_length=300)
+    action = models.CharField(max_length=5, choices=ACTIONS_HISTORIC, default="ADD")
 
      # ? Motivo da ação
     motive = models.CharField(max_length=300)
@@ -91,16 +114,16 @@ class Historic(models.Model):
         return self.motive
 
 class HistoricPoint(Historic):
-    # TODO: Dados referente ao historico do Point
+    # ?: Dados referente ao historico do Point
     # ? ponto em que foi realizado
     point = models.ForeignKey(Point, on_delete=models.CASCADE)
 class HistoricUser(Historic):
-    # TODO: Dados referente ao historico do User
+    # ?: Dados referente ao historico do User
     # ? usuário que foi realizado uma função
     user = models.ForeignKey(User, on_delete=models.SET_DEFAULT , default=None, null=True)
 
 class PointRow(models.Model):
-    # TODO Descrição das filas
+    # ? Descrição das filas
 
     # ? ponto referente
     point = models.ForeignKey(Point, on_delete=models.PROTECT)
@@ -120,22 +143,23 @@ class PointRow(models.Model):
         return str(self.position)+" "+str(self.user_id)
 
 class PointEmployee(models.Model):
-    # TODO: Listar os usuários que fazem parte de um ponto
+    CARGOS_POINT ={
+        ("M","motorista"),
+        ("A","admin"),
+        ("P","prancheteiro")
+    }
 
+    # ?: Listar os usuários que fazem parte de um ponto
     point = models.ForeignKey(Point, on_delete=models.CASCADE)
 
-    # ? ID do Usuário  
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # ? Vincula o device Id no ponto
+    deviceid=models.ForeignKey(DeviceId, on_delete=models.CASCADE)
 
     # ? Função - Admin e motorista
-    function = models.CharField(max_length=300,default="motorista")
+    function = models.CharField(max_length=1,choices=CARGOS_POINT,default="M")
 
     # ? Caso o dono do ponto queira desligar do sistema
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return str(self.user_id)+" "+str(self.active)+" - "+self.function
-
-
-
-
+        return str(self.point.name)+" - "+self.function

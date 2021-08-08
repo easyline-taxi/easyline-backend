@@ -1,12 +1,13 @@
 from django.urls import path, include
 
-from api.views import RegisterUsers
+from . import views
 from rest_framework import routers
 
 router = routers.DefaultRouter()
 
 urlpatterns = [
-    path('register/',RegisterUsers.as_view()),
+    path('login/',views.ObtainJSONWebToken.as_view()),
+    path('register/',views.RegisterUsers.as_view()),
     path('user/',include('api.components.user.urls')),
     path('point/',include('api.components.point.urls')),
     path('plan/',include('api.components.plan.urls'))
