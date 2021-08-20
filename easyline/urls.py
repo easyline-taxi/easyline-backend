@@ -15,11 +15,25 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_jwt.views import refresh_jwt_token,verify_jwt_token
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Easyline Api",
+      default_version='v1',
+      description="EndPoints Para a aplicação do serviços",
+      terms_of_service="https://www.google.com/",
+      contact=openapi.Contact(email="email@localhost"),
+      license=openapi.License(name="Licence"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
+    path('doc/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('admin/', admin.site.urls),
-    path('api/refresh/',refresh_jwt_token, name='token_refresh'),
-    path('api/verify/', verify_jwt_token, name='token_verify'),
-    path('api/',include('api.urls'))
+    path('api/',include('api.urls')),
 ]

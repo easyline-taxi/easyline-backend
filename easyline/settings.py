@@ -39,7 +39,7 @@ SECRET_KEY = 'django-insecure-j7!ppc90hmj8296s2wf1_)qgfv28&fq7p_o$ojp4sikg4g9-p*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0','localhost','127.0.0.1','206.189.114.185',]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'api',
-    'channels'
+    'channels',
+    'drf_yasg',
     
 ]
 
@@ -74,6 +75,20 @@ JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
     'JWT_AUTH_COOKIE': None,
 
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'token': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        },
+    },
+    'SUPPORTED_SUBMIT_METHODS': ['get', 'put', 'post', 'patch'],
+    'DISPLAY_OPERATION_ID': True,
+    'DOC_EXPANSION': 'none',
+    'SHOW_REQUEST_HEADERS': True
 }
 
 # Rest Framwork
