@@ -8,7 +8,7 @@ upstream django_server_asgi {
 }
 server {
     listen 8000;
-    server_name localhost;
+    server_name easyline.ml;
 
     location / {
         proxy_pass http://django_server;

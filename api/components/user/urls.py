@@ -6,6 +6,4 @@ urlpatterns = [
     # ? Atualizar os dados PUT
     # ? deletar os usuários DELETE
     path('', views.UserDataView.as_view(), name='data'),
-    
-    
 ]

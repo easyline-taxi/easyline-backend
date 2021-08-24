@@ -20,14 +20,14 @@ def createUser(client):
         Cria um usuário consistente
     """
     number_rand = int(random()*100)
-    response = client.post('/api/register/', {
+    response = client.post('/api/auth/register/', {
             "email": "teste%d@tester.com" % number_rand,
             "deviceid": number_rand,
             "name": "tester %d" % number_rand,
             "cpf": generate_cpf(),
             "password": "123",
             "confirm_password": "123"
-        })
+        },content_type="application/json")
     credentials = {
         "email":"teste%d@tester.com" % number_rand,
         "password":"123",
@@ -39,11 +39,11 @@ def loginUser(client,credentials):
     """
         Faz Login com as credenciais
     """
-    response = client.post('/api/login/', {
+    response = client.post('/api/auth/login/', {
         "username": credentials.get("email"), 
         "password": credentials.get("password"),
         "deviceid": credentials.get("deviceid")
-        })
+        },content_type="application/json")
     authorization = 'Bearer ' + response.json().get('token')
     return response,authorization
 
@@ -59,7 +59,7 @@ def createPoint(client,auth):
                 "city": "City_name_%d" % number_rand,
                 "country": "%d" % int(random()*10)
             },
-            HTTP_AUTHORIZATION=auth,
+            HTTP_AUTHORIZATION=auth,content_type="application/json"
         )
     credentials = {
         "name": "point_name_%d" % number_rand,
@@ -76,14 +76,14 @@ def selectPointToWork(client,auth,point):
     {
         "point": point.get("id")
     },
-    HTTP_AUTHORIZATION=auth)
+    HTTP_AUTHORIZATION=auth,content_type="application/json")
     return response
 
 def addUserToPoint(client,auth_owner,user):
     response = client.post("/api/point/actions/",
         {
             "deviceid":user.get("deviceid")
-        },HTTP_AUTHORIZATION=auth_owner,
+        },HTTP_AUTHORIZATION=auth_owner,content_type="application/json"
     )
     return response
 

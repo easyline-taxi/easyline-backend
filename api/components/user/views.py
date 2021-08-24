@@ -1,7 +1,8 @@
 from rest_framework import permissions
 from django.contrib.auth.decorators import login_required
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from django.utils.translation import gettext as _
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from .serializer import UserSerializerPut,UserSerializer
 from rest_framework.views import APIView
@@ -11,10 +12,16 @@ from PIL import Image
 # ! Import From App
 from api.models import User,Point,PointEmployee,DeviceId,HistoricUser
 
+
+    
 class UserDataView(APIView):
     serializer_class= UserSerializer
 
+
     def get(self, request, format=None):
+        """
+            Retorna os dados referentes ao usuário
+        """
         #  ?: Retorna os dados do usuário
 
         # ? Verifica se o deviceId é correspondente ao usuário
@@ -69,12 +76,17 @@ class UserDataView(APIView):
                 } for x in pontos_trabalhados]})
 
     def put(self,request, format=None):
-        # ?: Atualiza os dados do usuário
+        """
+             Atualiza os dados do usuário
+        """
         
         # ? Verifica se o deviceId é correspondente ao usuário
         # ! Não precisa mais verificar deviceID
         # if not str(request.user.deviceid) == str(request.data.get('deviceid')):
         #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+        self.serializer_class = UserSerializerPut
 
         # ? Aloca os campos necessários de acordo com o modelo 
         serializer = UserSerializerPut(data =request.data)

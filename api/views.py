@@ -13,6 +13,7 @@ from rest_framework_jwt.views import ObtainJSONWebToken
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
 from django.utils.translation import ugettext as _
 from rest_framework_jwt.settings import api_settings
+from rest_framework.permissions import AllowAny
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -64,7 +65,8 @@ class UserSerializerRegister(serializers.HyperlinkedModelSerializer):
 
 class RegisterUsers(APIView):
 
-    permission_classes = []
+    permission_classes = [AllowAny]
+    authentication_classes=[]
     serializer_class = UserSerializerRegister
 
     def post(self, request):
@@ -120,4 +122,6 @@ class JSONWebTokenSerializer(JSONWebTokenSerializer):
             raise serializers.ValidationError(msg)
 
 class ObtainJSONWebToken(ObtainJSONWebToken):
+    permission_classes = [AllowAny]
+    authentication_classes=[]
     serializer_class = JSONWebTokenSerializer
