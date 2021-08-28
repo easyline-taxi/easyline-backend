@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
-from rest_framework.views import APIView
-from .serializer import PointRegisterSerializer
+from .serializer import PointRegisterSerializer,PointOwnerActionSerializer,PointUserActionSerializer
 from django.utils.translation import gettext as _
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 # ! Imports do APP
 from api.models import Point,User, PointEmployee, HistoricPoint, HistoricUser,DeviceId
+from ..utils.utils import APIView
 
 # class PointGerals(viewsets.ViewSet):
 #     serializer_class = None
@@ -60,10 +61,17 @@ class PointRegister(APIView):
 
 
 class PointUserAction (APIView):
+
     # TODO: Setup Tests
     # ? Ações user(comum)/point
 
+    serializer_class = PointUserActionSerializer
+
     def get(self, request, format=None):
+        """
+            Pega os Pontos Relacionado ao user logado
+        """
+
         # ? Pega os pontos relacionado ao user
         try:
             # ! find points by device id
@@ -81,6 +89,10 @@ class PointUserAction (APIView):
             return Response({"message": _(str(ex))}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, format=None):
+        """
+            Escolhe qual ponto será trabalhado e ativado pelo usuário
+        """
+
         # ? Escolher qual ponto será trabalhado e ativado pelo usuário
         try:
             devices = DeviceId.objects.filter(user=request.user).order_by('-last_used')
@@ -97,9 +109,16 @@ class PointUserAction (APIView):
 
 
 class PointOwnerAction(APIView):
+
+
     # TODO: Setup Tests
+    serializer_class = PointOwnerActionSerializer
 
     def delete(self, request, format=None):
+        """ 
+            DELETAR PONTO (apenar Owner do ponto)
+        """
+        
         # ?  Deletar o ponto
         point = request.data.get('point')
         if point == None:
@@ -116,6 +135,11 @@ class PointOwnerAction(APIView):
         return Response({"message": "Point does not exists: " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, format=None):
+        """ 
+            Transferir ponto  (apenar Owner do ponto)
+        """
+
+
         # ?: Transferir o ponto
 
         # ? get actual point 
@@ -157,7 +181,20 @@ class PointOwnerAction(APIView):
 
 class PointOwnerUserAction(APIView):
     # TODO: Setup Tests
+
+    serializer_class = PointOwnerActionSerializer
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.method == "DELETE":
+            return PointOwnerActionSerializer
+        else:
+            return PointOwnerActionSerializer
+
     def post(self, request, format=None):
+        """
+            Adicionar usuários do ponto (apenar Owner do ponto)
+        """
+
         # ? TODO: Adicionar usuários do ponto
 
         #  ? checa se o usuário TEM PERMISSAO para adicionar no point
@@ -185,9 +222,14 @@ class PointOwnerUserAction(APIView):
 
         return Response({"message": "Usuário Adicionado"})
 
+    
     def delete(self,request,format=None):
+        """ 
+            Remover usuários do ponto (apenar Owner do ponto), ENVIAR EMAIL DO USUÁRIO
+        """
+
         # TODO: Setup Tests
-        """ TODO: Remover usuários do ponto """
+
         motive = "Removeu o usuário usuário"
         # ? TODO Verficiar o usuário tem permissão
         point = Point.objects.get(pk = request.user.point_id)
