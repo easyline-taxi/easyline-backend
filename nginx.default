@@ -10,17 +10,21 @@ server {
     listen 8000;
     server_name easyline.ml;
 
+    location /static {
+        root /app/;
+    }
+    
+    location ~ /ws {
+        proxy_pass http://django_server_asgi;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
     location / {
         proxy_pass http://django_server;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
-    location /ws {
-        proxy_pass http://django_server_asgi;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-    location /static {
-        root /app/;
-    }
+    
+    
 }
