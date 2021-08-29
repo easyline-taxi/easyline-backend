@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # start-server.sh
 python manage.py makemigrations
 python manage.py migrate
