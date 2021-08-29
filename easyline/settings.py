@@ -26,6 +26,8 @@ if not config.get('PASSDB'):
 import os
 from pathlib import Path
 
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -42,6 +44,17 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+# GEO DJANGO
+
+if os.name == 'nt':
+    
+    VIRTUAL_ENV_BASE = os.environ['VIRTUAL_ENV']
+    os.environ['PATH'] = os.path.join(VIRTUAL_ENV_BASE, r'Lib\site-packages\osgeo') + ';' + os.environ['PATH']
+    os.environ['PROJ_LIB'] = os.path.join(VIRTUAL_ENV_BASE, r'Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
+    os.environ['GDAL_DATA'] = os.path.join(VIRTUAL_ENV_BASE,r"Lib\site-packages\osgeo\data\gdal")
+    GDAL_LIBRARY_PATH = os.path.join(VIRTUAL_ENV_BASE,r'Lib\site-packages\osgeo\gdal302.dll')
+
+# GEOS_LIBRARY_PATH = r'C:\OSGeo4W\bin\geos_c.dll' 
 # Application definition
 
 INSTALLED_APPS = [
@@ -51,12 +64,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'rest_framework',
     'api',
     'channels',
     'drf_yasg',
+    'websocket',
     
 ]
+
 
 from datetime import timedelta
 
@@ -101,6 +117,15 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(config.get('REDIS_HOST', '127.0.0.1'), config.get('REDIS_PORT', '6379'))],
+        },
+    },
 }
 
 

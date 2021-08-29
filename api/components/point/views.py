@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
-from .serializer import PointRegisterSerializer,PointOwnerActionSerializer,PointUserActionSerializer
+from .serializer import PointRegisterSerializer,PointOwnerActionSerializer,PointUserActionSerializer,PointOwnerActionSerializerPolygon
 from django.utils.translation import gettext as _
 from rest_framework.response import Response
 from rest_framework.decorators import action
-
+import json
+from django.contrib.gis.geos import GEOSGeometry, Point as ptr, Polygon, LinearRing
+import ast
 # ! Imports do APP
 from api.models import Point,User, PointEmployee, HistoricPoint, HistoricUser,DeviceId
 from ..utils.utils import APIView
@@ -55,7 +57,7 @@ class PointRegister(APIView):
                 # ! find points by device id
                 devices = DeviceId.objects.filter(user=request.user).order_by('-last_used')
                 PointEmployee.objects.create(deviceid=devices[0], point=point, function="A")
-            return Response({"message": _("Point Created"), "data": {'name': point.name, "city": point.city, "country": point.country}})
+            return Response({"message": _("Point Created"), "data": {'name': point.name, "city": point.city, "country": point.country,'id':point.id}})
         except Exception as ex:
             return Response({"message": _(str(ex))}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -99,13 +101,13 @@ class PointUserAction (APIView):
             # ? Procura os pontos trabalhados
             pontos_trabalhados = PointEmployee.objects.all().filter(deviceid=devices[0])
             ponto_selecionado = [
-                x for x in pontos_trabalhados if str(x.point.id) == str(request.data.get('point'))]
+                x for x in pontos_trabalhados if str(x.point.id) == str(request.data.get('id'))]
             if ponto_selecionado != None:
                 request.user.point_id = ponto_selecionado[0].point.id
                 request.user.save()
                 return Response({"message": "Point Selected "+str(request.user.point_id)})
         except Exception as ex:
-            return Response({"message": "Point does not exists " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Point does not exists " + str(request.data.get('id'))}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PointOwnerAction(APIView):
@@ -113,6 +115,59 @@ class PointOwnerAction(APIView):
 
     # TODO: Setup Tests
     serializer_class = PointOwnerActionSerializer
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.method == "PUT":
+            return PointOwnerActionSerializerPolygon
+        else:
+            return PointOwnerActionSerializer
+
+    def put(self,request, format=None):
+        """
+            Seta as coodernadas do polygono
+
+             {
+{
+  "coordinates": ["(1.96,4.57)","(6.38,7.09)","(7.76,0.49)","(1.72,0.23)","(0.2,3.29)"]
+}
+
+        """
+
+        # ? Pega o ponto atual
+        try:
+            point = Point.objects.get(pk=request.user.point_id)
+        except Exception:
+            return Response({"message": "Você não está vinculado a um ponto"},status=status.HTTP_403_FORBIDDEN)
+
+        # ? verifica se o usuário é dono do ponto atual
+        if point.owner.id != request.user.id:
+            return Response({"message": "Você não é dono do ponto"},status=status.HTTP_403_FORBIDDEN)
+        
+        # ? Verifica se o polygono existe
+        if not request.data.get('coordinates'):
+            return Response({"message": "Campo 'coordinates' é necessário "},status=status.HTTP_400_BAD_REQUEST)
+
+        coords = []
+        for coordinate in request.data.get('coordinates'):
+            coords.append(ast.literal_eval(coordinate))
+
+        coords.append(coords[0])
+
+        # ? Verifica se o poligono tem pontos >= 2 e <=5
+        if len(coords) <3 and len(coords)>6:
+            return Response({"message": "Polígono mal formado."},status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            polygon= Polygon(tuple(coords))
+        except Exception as ex:
+            return Response({"message": "Polígono mal formado."},status=status.HTTP_400_BAD_REQUEST)
+
+        point.local = coords
+        point.save()
+        return Response({"message": "Ponto Salvo"})
+
+
+
+
 
     def delete(self, request, format=None):
         """ 
@@ -134,7 +189,7 @@ class PointOwnerAction(APIView):
             return Response({"message": "Point Deleted with Sucessful"})
         return Response({"message": "Point does not exists: " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, format=None):
+    def post(self, request, format=None):
         """ 
             Transferir ponto  (apenar Owner do ponto)
         """

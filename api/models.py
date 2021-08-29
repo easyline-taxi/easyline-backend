@@ -29,10 +29,14 @@ class User(AbstractUser,models.Model):
     city = models.CharField(max_length=100, blank= True, null=True)
     country = models.CharField(max_length=100, blank= True, null=True)
     photo = models.ImageField('photo',upload_to='images/',null=True)
+    active = models.BooleanField( default=True)
 
     # ? Ponto sendo trabalhado
 
     point_id=models.IntegerField(null=True)
+
+    def is_active(self):
+        return self.active
 
     # ? Validação do CPF
     def cpfValidator(self,cpf:str):

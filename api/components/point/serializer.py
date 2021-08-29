@@ -27,4 +27,7 @@ class PointUserActionSerializer(serializers.HyperlinkedModelSerializer):
         model = Point
         fields = ['id']
 
+class PointOwnerActionSerializerPolygon(serializers.Serializer):
+    coordinates = serializers.JSONField(default=[])
+
 

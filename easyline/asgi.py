@@ -14,26 +14,24 @@ import django
 
 # 
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
 from django.conf.urls import url
 
-from api.channels.websocket import ChatConsumer
 # # 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'easyline.settings')
 django.setup()
-from .channelsMiddleware import TokenAuthMiddleware
+from websocket.middlewares.channelsMiddleware import TokenAuthMiddleware
+import websocket.routing
+
 
 # application = get_asgi_application()
 
 application = ProtocolTypeRouter({
     # "http": get_asgi_application(),
     "websocket": TokenAuthMiddleware(
-        URLRouter([
-            # url(r"^chat/admin/$", AdminChatConsumer.as_asgi()),
-            url(r"^chat/$", ChatConsumer.as_asgi()),
-        ])
+        URLRouter(
+            websocket.routing.url_patterns
+        )
     )
-    # Just HTTP for now. (We can add other protocols later.)
 })
 
