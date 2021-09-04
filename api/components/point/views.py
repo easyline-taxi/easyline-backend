@@ -30,6 +30,9 @@ from ..utils.utils import APIView
 #         # ?: Atualizar um ponto
 #         pass
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
 
 class PointRegister(APIView):
     """
@@ -39,6 +42,17 @@ class PointRegister(APIView):
     serializer_class = PointRegisterSerializer
 
     def post(self, request, format=None):
+
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
+
         # ? Criar um ponto vinculado ao usuário
         serializer = PointRegisterSerializer(data=request.data)
 
@@ -74,6 +88,16 @@ class PointUserAction (APIView):
             Pega os Pontos Relacionado ao user logado
         """
 
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
+
         # ? Pega os pontos relacionado ao user
         try:
             # ! find points by device id
@@ -94,6 +118,16 @@ class PointUserAction (APIView):
         """
             Escolhe qual ponto será trabalhado e ativado pelo usuário
         """
+
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
 
         # ? Escolher qual ponto será trabalhado e ativado pelo usuário
         try:
@@ -131,6 +165,16 @@ class PointOwnerAction(APIView):
 }
 
         """
+
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
 
         # ? Pega o ponto atual
         try:
@@ -174,6 +218,17 @@ class PointOwnerAction(APIView):
             DELETAR PONTO (apenar Owner do ponto)
         """
         
+
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
+
         # ?  Deletar o ponto
         point = request.data.get('point')
         if point == None:
@@ -193,6 +248,16 @@ class PointOwnerAction(APIView):
         """ 
             Transferir ponto  (apenar Owner do ponto)
         """
+
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
 
 
         # ?: Transferir o ponto
@@ -250,6 +315,16 @@ class PointOwnerUserAction(APIView):
             Adicionar usuários do ponto (apenar Owner do ponto)
         """
 
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
+
         # ? TODO: Adicionar usuários do ponto
 
         #  ? checa se o usuário TEM PERMISSAO para adicionar no point
@@ -282,6 +357,16 @@ class PointOwnerUserAction(APIView):
         """ 
             Remover usuários do ponto (apenar Owner do ponto), ENVIAR EMAIL DO USUÁRIO
         """
+
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
 
         # TODO: Setup Tests
 

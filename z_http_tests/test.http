@@ -1,0 +1,71 @@
+# @url =206.189.114.185:8000/api
+@url =127.0.0.1:8000/api
+@email = admin@easyline.com
+@pass = easyline@123
+
+@deviceid = 2123123
+
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1LCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzMjAyMjA2MCwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzMDcyNjA2MH0.SvtWNUMBj-Vf5tQBoS4t5FpALdKM5vifPmewSLsIvIk
+
+###
+POST http://{{url}}/auth/register/ HTTP/1.1
+content-type: application/json
+
+{
+	"email": "{{email}}",
+	"deviceid":{{deviceid}},
+ 	"name":"Admin",
+	"cpf":"32132132132",
+	"password": "{{pass}}",
+	"confirm_password": "{{pass}}"
+}
+
+###
+
+POST http://{{url}}/auth/login/ HTTP/1.1
+content-type: application/json
+
+{
+	"username": "{{email}}",
+	"password": "{{pass}}",
+	"deviceid":{{deviceid}}
+}
+
+###
+
+POST http://{{url}}/point/register/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+	"name":"Os Forasteiros 2",
+	"city":"Rio de Fevereiro",
+	"country":"RJ"
+}
+
+###
+
+POST http://{{url}}/point/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+	"id":1
+}
+
+###
+
+PUT http://{{url}}/point/config/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "coordinates": ["(1.96,4.57)","(6.38,7.09)","(7.76,0.49)","(1.72,0.23)","(0.2,3.29)"]
+}
+###
+
+GET http://{{url}}/user/
+Authorization: Bearer {{token}}
+
+
+

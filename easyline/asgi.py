@@ -13,8 +13,9 @@ from django.core.asgi import get_asgi_application
 import django
 
 # 
-from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.routing import ProtocolTypeRouter, URLRouter, ChannelNameRouter
 from django.conf.urls import url
+from task.routing import channels_urlspattern
 
 # # 
 
@@ -28,6 +29,9 @@ import websocket.routing
 
 application = ProtocolTypeRouter({
     # "http": get_asgi_application(),
+     "channel": ChannelNameRouter(
+        channels_urlspattern
+    ),
     "websocket": TokenAuthMiddleware(
         URLRouter(
             websocket.routing.url_patterns

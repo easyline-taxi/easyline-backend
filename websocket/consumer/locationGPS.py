@@ -4,7 +4,7 @@ import json
 from django.utils import timezone
 # from .models import 
 from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync,sync_to_async
 
 
 channel_layer = get_channel_layer()
@@ -28,12 +28,15 @@ class Location(WebsocketConsumer):
             async_to_sync(self.channel_layer.group_add)("public", self.channel_name)
             self.accept()
 
+            
 
-            async_to_sync(channel_layer.send)('background-task', {'type': 'task_notify_user','host':self.scope.get('host'),'repeat':5})
+
+            # async_to_sync(channel_layer.send)('background-task', {'type': 'task_notify_user','host':self.scope.get('host'),'repeat':5})
 
     
     def disconnect(self, close_code):
         user = self.scope.get('user', None)
+        
 
         if user.is_anonymous:
 
@@ -55,9 +58,9 @@ class Location(WebsocketConsumer):
             self.send({"err": "Formatacao do JSON invalida"})
             
         print(data)
-        print(self.channel_name)
         
-        self.send(data)
+        print(self.channel_name)
+
 
     def public_message(self, event):
         # Envia para o grupo

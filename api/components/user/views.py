@@ -13,6 +13,10 @@ from PIL import Image
 from api.models import User,Point,PointEmployee,DeviceId,HistoricUser
 from ..utils.utils import APIView
 
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
     
 class UserDataView(APIView):
 
@@ -26,6 +30,17 @@ class UserDataView(APIView):
         """
             Retorna os dados referentes ao usuário
         """
+
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
+
         #  ?: Retorna os dados do usuário
 
         # ? Verifica se o deviceId é correspondente ao usuário
@@ -60,6 +75,8 @@ class UserDataView(APIView):
             b64image = "data:image/"+image.format+";base64,"+b64
         except Exception as ex:
             pass
+
+        
         
         return Response({
             "user_data":
@@ -89,6 +106,16 @@ class UserDataView(APIView):
         # if not str(request.user.deviceid) == str(request.data.get('deviceid')):
         #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)
 
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
+
         # ? Aloca os campos necessários de acordo com o modelo 
         serializer = UserSerializerPut(data =request.data)
         try:
@@ -111,6 +138,16 @@ class UserDataView(APIView):
     def delete(self,request,format=None):
         # ?: Deleta o usuário
         # ! Verificar a validade disso, pois acho que a conta não poderá ser excluida
+
+        # ENVIO DE LOG DO BOT DISCORD
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_message_discord', 
+            'user': request.user.email,
+            'action': request.method,
+            'from':request.META.get('REMOTE_ADDR'),
+            'url': request.get_full_path()
+            })
         try:
             user = User.objects.get(pk = request.user.id)
             user.delete()
