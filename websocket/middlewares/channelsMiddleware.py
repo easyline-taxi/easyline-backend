@@ -32,13 +32,18 @@ class TokenAuthMiddleware:
 
         # Get the token
         try:
-            token = [x[1].decode("utf8") for x in scope['headers'] if x[0].decode("utf8") == 'authorization']
-            token_decoded = jwt_decode_handler(token[0].split(' ')[1])
-            user = await get_user(token_decoded.get('user_id'))
-            if user:
-                scope['user'] = user
-            else: 
-                scope['user'] = AnonymousUser
+
+            if 'query_string' in scope:
+                token_name, token_key = scope['query_string'].decode("utf-8").split('&')[0].split('=')[1].split('%20')
+                token_decoded = jwt_decode_handler(token_key)
+
+                print(token_key)
+                if token_name == 'Token':
+                    scope['user'] = await get_user(token_decoded.get('user_id'))
+                if not scope.get('user'):
+                    scope['user'] = AnonymousUser
+                return await self.app(scope,receive, send)
+
         except Exception as ex:
             print("Erro: ",ex)
             
