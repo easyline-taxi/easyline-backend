@@ -6,7 +6,7 @@ from easyline.utils import genAction,genEmployee
 from api.models import User,Point,HistoricPoint,HistoricUser,PointEmployee
 
 class UserSerializerPut(serializers.HyperlinkedModelSerializer):
-    photo = serializers.ImageField()
+    # photo = serializers.ImageField()
     class Meta:
         model = User
         fields = ['vtr', "name","city","country","photo"]

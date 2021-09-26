@@ -54,11 +54,12 @@ class UserDataView(APIView):
         pontos_trabalhados = PointEmployee.objects.filter(deviceid=device)
         pontos_trabalhados = [x for x in pontos_trabalhados if x.deviceid.user == request.user]
 
-        b64image = None
         try:
 
             # ? get image
-            image = Image.open(request.user.photo)
+            data = base64.b64decode(request.user.photo)
+            image = Image.open(io.StringIO(request.user.photo))
+
             
             # ?get image size
             (width, height) = image.size 
@@ -66,13 +67,14 @@ class UserDataView(APIView):
 
                 # ? Resize Image
                 image = image.resize((70,70), Image.ANTIALIAS)
-                image.save(request.user.photo.path)
 
             # ?Convert do base64
             output = io.BytesIO()
             image.save(output, format=image.format)
             b64 = base64.b64encode(output.getvalue()).decode('utf-8')
             b64image = "data:image/"+image.format+";base64,"+b64
+            request.user.photo = b64image
+            request.user.save()
         except Exception as ex:
             pass
 
@@ -85,7 +87,7 @@ class UserDataView(APIView):
                     "vtr":request.user.vtr,
                     "name":request.user.name,
                     "email":request.user.email,
-                    "photo":b64image
+                    "photo":request.user.photo
                 },
             "point_data": [
                 {
