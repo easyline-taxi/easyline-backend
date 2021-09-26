@@ -28,7 +28,7 @@ class User(AbstractUser,models.Model):
     name = models.CharField(max_length=300, blank=True)
     city = models.CharField(max_length=100, blank= True, null=True)
     country = models.CharField(max_length=100, blank= True, null=True)
-    photo = models.ImageField('photo',upload_to='images/',null=True)
+    photo = models.ImageField(upload_to='images/',null=True)
     active = models.BooleanField( default=True)
 
     # ? Ponto sendo trabalhado
