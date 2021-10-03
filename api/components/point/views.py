@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
-from .serializer import PointRegisterSerializer,PointOwnerActionSerializer,PointUserActionSerializer,PointOwnerActionSerializerPolygon
+from . import serializers
+from django.db.models import Q
 from django.utils.translation import gettext as _
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -8,7 +9,7 @@ import json
 from django.contrib.gis.geos import GEOSGeometry, Point as ptr, Polygon, LinearRing
 import ast
 # ! Imports do APP
-from api.models import Point,User, PointEmployee, HistoricPoint, HistoricUser,DeviceId
+from api import models
 from ..utils.utils import APIView
 
 # class PointGerals(viewsets.ViewSet):
@@ -39,7 +40,7 @@ class PointRegister(APIView):
         Cria um ponto
     """
     # ? TODO: Setup Tests
-    serializer_class = PointRegisterSerializer
+    serializer_class = serializers.PointRegisterSerializer
 
     def post(self, request, format=None):
 
@@ -54,23 +55,23 @@ class PointRegister(APIView):
             })
 
         # ? Criar um ponto vinculado ao usuário
-        serializer = PointRegisterSerializer(data=request.data)
+        serializer = serializers.PointRegisterSerializer(data=request.data)
 
         try:
             # ? Verifica a validade dos dados
             serializer.is_valid(raise_exception=True)
 
             # ? Cria o ponto
-            point = Point.objects.create(owner=request.user, name=serializer.data.get('name', None), city=serializer.data.get(
+            point = models.Point.objects.create(owner=request.user, name=serializer.data.get('name', None), city=serializer.data.get(
                 'city', None), country=serializer.data.get('country', None), plan=serializer.data.get('plan', None))
             if point != None:
-                HistoricPoint.objects.create(
+                models.HistoricPoint.objects.create(
                     point=point, suject=request.user, motive="Ponto fundado", action="F")
-                HistoricUser.objects.create(
+                models.HistoricUser.objects.create(
                     user=request.user, suject=request.user, motive="Criou o ponto", action="F")
                 # ! find points by device id
-                devices = DeviceId.objects.filter(user=request.user).order_by('-last_used')
-                PointEmployee.objects.create(deviceid=devices[0], point=point, function="A")
+                devices = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')
+                models.PointEmployee.objects.create(deviceid=devices[0], point=point, function="A")
             return Response({"message": _("Point Created"), "data": {'name': point.name, "city": point.city, "country": point.country,'id':point.id}})
         except Exception as ex:
             return Response({"message": _(str(ex))}, status=status.HTTP_400_BAD_REQUEST)
@@ -81,7 +82,7 @@ class PointUserAction (APIView):
     # TODO: Setup Tests
     # ? Ações user(comum)/point
 
-    serializer_class = PointUserActionSerializer
+    serializer_class = serializers.PointUserActionSerializer
 
     def get(self, request, format=None):
         """
@@ -101,14 +102,14 @@ class PointUserAction (APIView):
         # ? Pega os pontos relacionado ao user
         try:
             # ! find points by device id
-            devices = DeviceId.objects.filter(user=request.user).order_by('-last_used')
-            pontos_trabalhados = PointEmployee.objects.filter(deviceid=devices[0])
+            devices = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')
+            pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=devices[0])
             return Response({"message": "Pontos Encontrados", "points": [
                 {
                     "id": x.point.id,
                     "name": x.point.name,
                     "owner_id": x.point.owner.id,
-                    "onlines": PointEmployee.objects.filter(point=x.point).count(),
+                    "onlines": models.PointEmployee.objects.filter(point=x.point).count(),
                     "function": x.function
                 } for x in pontos_trabalhados]})
         except Exception as ex:
@@ -131,9 +132,9 @@ class PointUserAction (APIView):
 
         # ? Escolher qual ponto será trabalhado e ativado pelo usuário
         try:
-            devices = DeviceId.objects.filter(user=request.user).order_by('-last_used')
+            devices = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')
             # ? Procura os pontos trabalhados
-            pontos_trabalhados = PointEmployee.objects.all().filter(deviceid=devices[0])
+            pontos_trabalhados = models.PointEmployee.objects.all().filter(deviceid=devices[0])
             ponto_selecionado = [
                 x for x in pontos_trabalhados if str(x.point.id) == str(request.data.get('id'))]
             if ponto_selecionado != None:
@@ -148,12 +149,12 @@ class PointOwnerAction(APIView):
 
 
     # TODO: Setup Tests
-    serializer_class = PointOwnerActionSerializer
+    serializer_class = serializers.PointOwnerActionSerializer
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == "PUT":
-            return PointOwnerActionSerializerPolygon
+            return serializers.PointOwnerActionSerializerPolygon
         else:
-            return PointOwnerActionSerializer
+            return serializers.PointOwnerActionSerializer
 
     def put(self,request, format=None):
         """
@@ -178,7 +179,7 @@ class PointOwnerAction(APIView):
 
         # ? Pega o ponto atual
         try:
-            point = Point.objects.get(pk=request.user.point_id)
+            point = models.Point.objects.get(pk=request.user.point_id)
         except Exception:
             return Response({"message": "Você não está vinculado a um ponto"},status=status.HTTP_403_FORBIDDEN)
 
@@ -234,12 +235,12 @@ class PointOwnerAction(APIView):
         if point == None:
             return Response({"message": "Point is invalid " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
         
-        devices = DeviceId.objects.filter(user=request.user).order_by('-last_used')
-        pontos_administrados = PointEmployee.objects.all().filter(
+        devices = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')
+        pontos_administrados = models.PointEmployee.objects.all().filter(
             deviceid=devices[0], function="A")
         p = [x for x in pontos_administrados if x.point.id == point]
         if len(p) == 1:
-            ponto = Point.objects.get(pk=p[0].point.id)
+            ponto = models.Point.objects.get(pk=p[0].point.id)
             ponto.delete()
             return Response({"message": "Point Deleted with Sucessful"})
         return Response({"message": "Point does not exists: " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
@@ -263,19 +264,19 @@ class PointOwnerAction(APIView):
         # ?: Transferir o ponto
 
         # ? get actual point 
-        point = Point.objects.get(pk=request.user.point_id)
+        point = models.Point.objects.get(pk=request.user.point_id)
         
         # ? verifica se o usuário é dono do ponto atual
         if point.owner.id != request.user.id:
             return Response({"message": "Você não é dono do ponto"},status=status.HTTP_403_FORBIDDEN)
 
         # ? pega o email do usuário que ele quer transferir
-        user = User.objects.get(email=request.data.get('email'))
-        devices = DeviceId.objects.filter(user=user).order_by('-last_used')
+        user = models.User.objects.get(email=request.data.get('email'))
+        devices = models.DeviceId.objects.filter(user=user).order_by('-last_used')
         target = devices[0]
 
         #  ?: Verificar se o cara que ele quer transferir está no ponto
-        if not len(PointEmployee.objects.filter(point=point,deviceid=target)):
+        if not len(models.PointEmployee.objects.filter(point=point,deviceid=target)):
             return Response({"message": "Usuário não pertence a este ponto"},status=status.HTTP_400_BAD_REQUEST)
 
         # ? Trasnfere a posse
@@ -284,31 +285,31 @@ class PointOwnerAction(APIView):
 
         # ? trocar as posições
         
-        device = DeviceId.objects.filter(user=request.user).order_by('-last_used')[0]
-        employee = PointEmployee.objects.filter(point=point,deviceid=device)[0]
+        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')[0]
+        employee = models.PointEmployee.objects.filter(point=point,deviceid=device)[0]
         employee.function = "M"
         employee.save()
-        employee = PointEmployee.objects.filter(point=point,deviceid=target)[0]
+        employee = models.PointEmployee.objects.filter(point=point,deviceid=target)[0]
         employee.function = "A"
         employee.save()
 
         # ? adicionar no histórico do ponto e do usuário
 
-        HistoricPoint.objects.create(point=point, suject=request.user, motive="Transferência de Posse", action="T")
-        HistoricUser.objects.create(user=request.user, suject=target.user, motive="Transferência de Posse", action="T")
+        models.HistoricPoint.objects.create(point=point, suject=request.user, motive="Transferência de Posse", action="T")
+        models.HistoricUser.objects.create(user=request.user, suject=target.user, motive="Transferência de Posse", action="T")
 
         return Response({"message": "Ponto Transferido"})
 
 class PointOwnerUserAction(APIView):
     # TODO: Setup Tests
 
-    serializer_class = PointOwnerActionSerializer
+    serializer_class = serializers.PointOwnerActionSerializer
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == "DELETE":
-            return PointOwnerActionSerializer
+            return serializers.PointOwnerActionSerializer
         else:
-            return PointOwnerActionSerializer
+            return serializers.PointOwnerActionSerializer
 
     def post(self, request, format=None):
         """
@@ -328,7 +329,7 @@ class PointOwnerUserAction(APIView):
         # ? TODO: Adicionar usuários do ponto
 
         #  ? checa se o usuário TEM PERMISSAO para adicionar no point
-        point = Point.objects.get(pk = request.user.point_id)
+        point = models.Point.objects.get(pk = request.user.point_id)
         if point.owner != request.user:
             return Response({"message": "Você não é dono do ponto"},status=status.HTTP_403_FORBIDDEN)
         
@@ -339,16 +340,16 @@ class PointOwnerUserAction(APIView):
         # ? TODO: buscar pelo device id
         # ! deviceID (QRCODE) - como USER
         try:
-            device = DeviceId.objects.filter(deviceid=request.data.get("deviceid")).order_by('-last_used')[0]
+            device = models.DeviceId.objects.filter(deviceid=request.data.get("deviceid")).order_by('-last_used')[0]
         except Exception as ex:
             return Response({"message": "DeviceId inválido"},status=status.HTTP_400_BAD_REQUEST)
         
         # ? TODO: Adicionar nos EMPLOYEEs
-        PointEmployee.objects.create(deviceid=device, point=point, function="M")
+        models.PointEmployee.objects.create(deviceid=device, point=point, function="M")
 
         # ? TODO: Adicionar no histórico
-        HistoricPoint.objects.create(point=point, suject=request.user, motive="Adicionou usuário", action="ADD")
-        HistoricUser.objects.create(user=request.user, suject=device.user, motive="Adicionou usuário", action="ADD")
+        models.HistoricPoint.objects.create(point=point, suject=request.user, motive="Adicionou usuário", action="ADD")
+        models.HistoricUser.objects.create(user=request.user, suject=device.user, motive="Adicionou usuário", action="ADD")
 
         return Response({"message": "Usuário Adicionado"})
 
@@ -372,26 +373,43 @@ class PointOwnerUserAction(APIView):
 
         motive = "Removeu o usuário usuário"
         # ? TODO Verficiar o usuário tem permissão
-        point = Point.objects.get(pk = request.user.point_id)
+        point = models.Point.objects.get(pk = request.user.point_id)
         if point.owner != request.user:
             return Response({"message": "Você não é dono do ponto"},status=status.HTTP_403_FORBIDDEN)
         
         # ! manda o email do cara
-        device = DeviceId.objects.filter(deviceid=request.data.get("email")).order_by('-last_used')[0]
+        device = models.DeviceId.objects.filter(deviceid=request.data.get("email")).order_by('-last_used')[0]
         if request.data.get("motive"):
             motive= request.data.get("motive")
 
         # ? TODO Verficiar se o usuário está no ponto
         
-        if not len(PointEmployee.objects.filter(point=point,deviceid=device)):
+        if not len(models.PointEmployee.objects.filter(point=point,deviceid=device)):
             return Response({"message": "Usuário não pertence a este ponto"},status=status.HTTP_400_BAD_REQUEST)
         
         # ? TODO Remover o usuário
-        employee = PointEmployee.objects.filter(point=point,deviceid=device)[0]
+        employee = models.PointEmployee.objects.filter(point=point,deviceid=device)[0]
         employee.delete()
         
         # ? TODO Adicionar nos históricos
-        HistoricPoint.objects.create(point=point, suject=request.user, motive=motive, action="REM")
-        HistoricUser.objects.create(user=request.user, suject=device.user, motive=motive, action="REM")
+        models.HistoricPoint.objects.create(point=point, suject=request.user, motive=motive, action="REM")
+        models.HistoricUser.objects.create(user=request.user, suject=device.user, motive=motive, action="REM")
 
         return Response({"message": "Usuário Removido"})
+
+
+class HistoricPointViewSet(viewsets.ModelViewSet):
+    """
+        Consulta de Histórico do ponto (Todas as ações registradas no ponto)
+
+        --
+
+    """
+    serializer_class = serializers.PointHistoricSerializer
+    queryset = models.HistoricUser.objects.all()
+    filterset_fields = ['suject']
+    http_method_names = ['get']
+
+    def get_queryset(self):
+        user = self.request.user
+        return models.HistoricPoint.objects.filter(point=user.point_id)

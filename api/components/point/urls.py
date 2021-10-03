@@ -1,5 +1,10 @@
 from django.urls import path, include
 from . import views
+from rest_framework import routers
+
+router = routers.DefaultRouter()
+router.register('historic',views.HistoricPointViewSet)
+
 
 urlpatterns = [
     # ! TODO: Actions do ponto
@@ -24,4 +29,4 @@ urlpatterns = [
     # ? descer pessoa
     # ? tripular
     # ? entrar na fila
-]
+] + router.urls

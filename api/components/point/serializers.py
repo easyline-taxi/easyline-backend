@@ -2,32 +2,37 @@ from rest_framework import serializers
 from django.utils import timezone
 
 # ! Imports from App
-from api.models import Point,User
+from api import models
 
 
 class PointRegisterSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
-        model = Point
+        model = models.Point
         fields = ['name','plan','city','country']
 
 class PointActions(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Point
+        model = models.Point
         fields = ['name','plan','city','country']
 
 class PointOwnerActionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = User
+        model = models.User
         fields = ['email']
 
 class PointUserActionSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.CharField(max_length=200)
     class Meta:
-        model = Point
+        model = models.Point
         fields = ['id']
 
 class PointOwnerActionSerializerPolygon(serializers.Serializer):
     coordinates = serializers.JSONField(default=[])
+
+class PointHistoricSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.HistoricPoint
+        fields = '__all__'
 
 

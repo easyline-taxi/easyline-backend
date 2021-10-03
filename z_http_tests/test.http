@@ -5,7 +5,7 @@
 
 @deviceid = 2123123
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1LCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzMjAyMjA2MCwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzMDcyNjA2MH0.SvtWNUMBj-Vf5tQBoS4t5FpALdKM5vifPmewSLsIvIk
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzNDU0NjQ0NSwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzMzI1MDQ0NX0.aGd8Dbu1vJ__tQm5e6Yt3kt2H1K7jnmE9F6WHcoSPxY
 
 ###
 POST http://{{url}}/auth/register/ HTTP/1.1
@@ -64,8 +64,19 @@ Authorization: Bearer {{token}}
 }
 ###
 
-GET http://{{url}}/user/
+GET http://127.0.0.1:8000/api/user/
 Authorization: Bearer {{token}}
+
+###
+
+GET http://127.0.0.1:8000/api/user/historic/
+Authorization: Bearer {{token}}
+
+###
+
+GET http://127.0.0.1:8000/api/point/historic/
+Authorization: Bearer {{token}}
+
 
 
 

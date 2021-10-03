@@ -3,14 +3,16 @@ from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, status, mixins
 from django.utils.translation import gettext as _
 from rest_framework.decorators import action
+from rest_framework import viewsets
 from rest_framework.response import Response
-from .serializer import UserSerializerPut,UserSerializer
+from django.db.models import Q
+from . import serializers
 import base64
 import io
 from PIL import Image
 
 # ! Import From App
-from api.models import User,Point,PointEmployee,DeviceId,HistoricUser
+from api import models
 from ..utils.utils import APIView
 
 
@@ -22,9 +24,9 @@ class UserDataView(APIView):
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == "PUT":
-            return UserSerializerPut
+            return serializers.UserSerializerPut
         else:
-            return UserSerializer
+            return serializers.UserSerializer
         
     def get(self, request, format=None):
         """
@@ -49,9 +51,9 @@ class UserDataView(APIView):
         #     # ! se não tiver device id registrado neste user REGISTRAR OUTRO DEVICE ID NELE
         #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)  
         
-        device = DeviceId.objects.filter(user=request.user).order_by('-last_used')[0]
+        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')[0]
         # ? Procura os pontos trabalhados
-        pontos_trabalhados = PointEmployee.objects.filter(deviceid=device)
+        pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device)
         pontos_trabalhados = [x for x in pontos_trabalhados if x.deviceid.user == request.user]
 
         try:
@@ -94,7 +96,7 @@ class UserDataView(APIView):
                     "id":x.point.id,
                     "name":x.point.name,
                     "owner_id": x.point.owner.id,
-                    "onlines":PointEmployee.objects.all().filter(point=x.point).count(),
+                    "onlines":models.PointEmployee.objects.all().filter(point=x.point).count(),
                     "function": x.function
                 } for x in pontos_trabalhados]})
 
@@ -119,7 +121,7 @@ class UserDataView(APIView):
             })
 
         # ? Aloca os campos necessários de acordo com o modelo 
-        serializer = UserSerializerPut(data =request.data)
+        serializer = serializers.UserSerializerPut(data =request.data)
         try:
             # ? Verifica a validade dos campos
             serializer.is_valid(raise_exception=True)
@@ -129,7 +131,7 @@ class UserDataView(APIView):
             user = serializer.update(request.user,serializer.validated_data)
 
             # ? TODO: ADicionar no HIstorico do Usuário essas ALTERÇÔES
-            HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
+            models.HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
 
             return Response({"message":"Update Sucessful" , "data":{'name':user.name,"email":user.email,"city":user.city,"country":user.country}})
         except Exception as ex:
@@ -138,6 +140,12 @@ class UserDataView(APIView):
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self,request,format=None):
+        """
+            # ?: Deleta o usuário
+
+            --
+            
+        """
         # ?: Deleta o usuário
         # ! Verificar a validade disso, pois acho que a conta não poderá ser excluida
 
@@ -151,11 +159,28 @@ class UserDataView(APIView):
             'url': request.get_full_path()
             })
         try:
-            user = User.objects.get(pk = request.user.id)
+            user = models.User.objects.get(pk = request.user.id)
             user.delete()
             return Response({"message":"Deleted Sucessful" })
         except Exception as ex:
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HistoricUserViewSet(viewsets.ModelViewSet):
+    """
+        Consulta de Histórico do Usuário (Todas as ações realizadas pelo usuário )
+
+        --
+
+    """
+    serializer_class = serializers.UserHistoricSerializer
+    queryset = models.HistoricUser.objects.all()
+    http_method_names = ['get']
+
+    def get_queryset(self):
+        user = self.request.user
+        return models.HistoricUser.objects.filter(Q(suject=user) | Q(user=user))
+    
 
 
        

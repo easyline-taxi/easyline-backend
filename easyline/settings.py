@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'channels',
     'drf_yasg',
     'websocket',
+    "django_filters",
     'task.apps.TaskConfig'
     
 ]
@@ -110,6 +111,9 @@ SWAGGER_SETTINGS = {
 
 # Rest Framwork
 REST_FRAMEWORK = {
+  
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
