@@ -35,4 +35,6 @@ class PointHistoricSerializer(serializers.ModelSerializer):
         model = models.HistoricPoint
         fields = '__all__'
 
+    
+
 

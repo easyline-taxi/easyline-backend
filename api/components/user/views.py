@@ -81,7 +81,6 @@ class UserDataView(APIView):
             pass
 
         
-        
         return Response({
             "user_data":
                 {
@@ -180,6 +179,9 @@ class HistoricUserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return models.HistoricUser.objects.filter(Q(suject=user) | Q(user=user))
+
+
+
     
 
 

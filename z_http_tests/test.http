@@ -5,8 +5,9 @@
 
 @deviceid = 2123123
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzNDU0NjQ0NSwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzMzI1MDQ0NX0.aGd8Dbu1vJ__tQm5e6Yt3kt2H1K7jnmE9F6WHcoSPxY
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzNDU5MDE1OCwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzMzI5NDE1OH0.ToA0dxTnVOwVTrIEbDIPnIMe28VrYAMTOmtVEnDaCB4
 
+@user_id = 2
 ###
 POST http://{{url}}/auth/register/ HTTP/1.1
 content-type: application/json
@@ -78,5 +79,7 @@ GET http://127.0.0.1:8000/api/point/historic/
 Authorization: Bearer {{token}}
 
 
+###
 
-
+GET http://127.0.0.1:8000/api/point/historic/{{user_id}}/getHistoricUserQrCode/
+Authorization: Bearer {{token}}

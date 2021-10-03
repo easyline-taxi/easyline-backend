@@ -11,6 +11,7 @@ import ast
 # ! Imports do APP
 from api import models
 from ..utils.utils import APIView
+from api.components.user import serializers as user_serializer
 
 # class PointGerals(viewsets.ViewSet):
 #     serializer_class = None
@@ -413,3 +414,23 @@ class HistoricPointViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return models.HistoricPoint.objects.filter(point=user.point_id)
+
+    @action(detail=True, methods=['get'])
+    def getHistoricUserQrCode(self,request,pk=None):
+        """
+            Consulta de Histórico do usuário com base no PK dele (Somente o Admin do ponto, logado no ponto, pode fazer isso)
+
+        --
+
+        """
+        point = models.Point.objects.get(pk = request.user.point_id)
+        if point.owner != request.user:
+            return Response({"message": "Você não é dono do ponto"},status=status.HTTP_403_FORBIDDEN)
+        user_point = models.User.objects.get(pk=pk)
+        
+        userHistoric = models.HistoricUser.objects.filter(Q(suject=user_point) | Q(user=user_point))
+        serializer = user_serializer.UserHistoricSerializer(userHistoric, many=True)
+        return Response(serializer.data)
+        
+
+   
