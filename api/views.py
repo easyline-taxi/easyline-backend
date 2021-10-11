@@ -4,19 +4,19 @@ from rest_framework.views import APIView
 from rest_framework import serializers
 from django.utils import timezone
 
-
 # ! Acessos do App
-from api.models import User,Point,HistoricPoint,HistoricUser,PointEmployee,DeviceId
+from api import models
 
 from django.contrib.auth import authenticate
-from rest_framework_jwt.views import ObtainJSONWebToken
-from rest_framework_jwt.serializers import JSONWebTokenSerializer
+from rest_framework_jwt.views import ObtainJSONWebToken as obtjsontoken
+from rest_framework_jwt.serializers import JSONWebTokenSerializer as jsontokenserializer
 from django.utils.translation import ugettext as _
 from rest_framework_jwt.settings import api_settings
 from rest_framework.permissions import AllowAny
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 class UserSerializerRegister(serializers.HyperlinkedModelSerializer):
     # ?: Adiciona o novo usuário padronizando o tal
 
@@ -24,7 +24,7 @@ class UserSerializerRegister(serializers.HyperlinkedModelSerializer):
     confirm_password = serializers.CharField(max_length=100)
     deviceid = serializers.CharField(max_length=150)
     class Meta:
-        model = User
+        model = models.User
         # ! name of point não vai
         fields = ['name', 'cpf', 'deviceid', 'email', 'city', 'country',
                   'password', 'confirm_password']
@@ -43,16 +43,16 @@ class UserSerializerRegister(serializers.HyperlinkedModelSerializer):
             raise Exception('Senhas não são iguais')
         
         # ? Validação do CPF
-        cpfValidado = User.cpfValidator(None, validated_data.get('cpf'))
+        cpfValidado = models.User.cpfValidator(None, validated_data.get('cpf'))
         if cpfValidado:
             validated_data['cpf'] = cpfValidado
-            user = User.objects.create_user(**validated_data,username=validated_data.get('email'))
+            user = models.User.objects.create_user(**validated_data,username=validated_data.get('email'))
             # vincula device id ao usuário
-            if len(DeviceId.objects.filter(deviceid=deviceid)):
+            if len(models.DeviceId.objects.filter(deviceid=deviceid)):
                 # ! Possivelmente usuário está logando no celular de outro usuário (Como tratar?)
                 user.delete()
                 raise Exception("deviceId já vinculado a um usuário")
-            DeviceId.objects.create(deviceid=deviceid, user=user)
+            models.DeviceId.objects.create(deviceid=deviceid, user=user)
         else:
             raise Exception('Invalid CPF')
         
@@ -103,47 +103,64 @@ class RegisterUsers(APIView):
     
 
     def post(self, request):
+        """
+        Registro do usuário
+
+        --
+        """
+
         serializer = UserSerializerRegister(data =request.data)
         serializer.is_valid(raise_exception=True)
         try:
             user = serializer.create(validated_data = serializer.validated_data)
+            # Cria o token
+            models.Token.objects.create(user=user)
             return Response({"Nome": user.name,"Email":user.email})
         except Exception as ex:
                 
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class JSONWebTokenSerializer(JSONWebTokenSerializer):
+class JSONWebTokenSerializer0(jsontokenserializer):
     deviceid = serializers.CharField(max_length=150)
+
 
     def validate(self, attrs):
         credentials = {
             self.username_field: attrs.get(self.username_field),
             'password': attrs.get('password')
         }
-
+        
         if all(credentials.values()):
             user = authenticate(**credentials)
-
             if user:
                 if not user.is_active:
                     msg = _('User account is disabled.')
                     raise serializers.ValidationError(msg)
                 if not attrs.get("deviceid"):
-                    msg = _('DeviceId is required.')
+                    msg = _('DeviceId is required muito required.')
                     raise serializers.ValidationError(msg)
-                devices = DeviceId.objects.filter(user=user,deviceid=attrs.get("deviceid"))
+                devices = models.DeviceId.objects.filter(user=user,deviceid=attrs.get("deviceid"))
                 if not len(devices):
                     # ! Usuário logou em aparelho diferente
-                    DeviceId.objects.create(user=user,deviceid=attrs.get("deviceid"))
+                    models.DeviceId.objects.create(user=user,deviceid=attrs.get("deviceid"))
                 else:
                     devices[0].last_used = timezone.now()
                     devices[0].save()
 
                 payload = jwt_payload_handler(user)
+                json_token = jwt_encode_handler(payload)
+                token = models.Token.objects.filter(user=user)
+                if token:
+                    token[0].key = json_token
+                    token[0].last_login = timezone.now()
+                    token[0].save()
+                    
+                else:
+                    models.Token.objects.create(user=user, key=json_token, last_login=timezone.now())
 
                 return {
-                    'token': jwt_encode_handler(payload),
+                    'token': json_token,
                     'user': user
                 }
             else:
@@ -153,8 +170,7 @@ class JSONWebTokenSerializer(JSONWebTokenSerializer):
             msg = _('Must include "{username_field}" and "password".')
             msg = msg.format(username_field=self.username_field)
             raise serializers.ValidationError(msg)
-
-class ObtainJSONWebToken(ObtainJSONWebToken):
+class ObtainJSONWebToken(obtjsontoken):
     permission_classes = [AllowAny]
     authentication_classes=[]
-    serializer_class = JSONWebTokenSerializer
+    serializer_class = JSONWebTokenSerializer0

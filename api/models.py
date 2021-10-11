@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
-
+import jwt
+from rest_framework_jwt.settings import api_settings
+from rest_framework import serializers
+jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 from djongo import models 
 
 # from django.db import models
@@ -19,6 +22,13 @@ def user_directory_path(instance, filename):
 class User(AbstractUser,models.Model):
     # ?: Dados armazenados dos usuários
 
+    ACTIONS_HISTORIC ={
+        ("TRI","tripulado"),
+        ("DIS","disponivel"),
+        ("IND","indisponivel")
+
+    }
+
     # ? Itens obrigatórios
     email= models.EmailField(max_length=254, unique=True)
     cpf = models.CharField(max_length=11, unique=True,default="00000000000")
@@ -30,6 +40,10 @@ class User(AbstractUser,models.Model):
     country = models.CharField(max_length=100, blank= True, null=True)
     photo = models.TextField(null=True)
     active = models.BooleanField( default=True)
+
+    last_position = models.JSONField("Ultima Posição (Localização)", null=True)
+    last_position_time = models.DateTimeField(null=True,default=timezone.now)
+    status = models.CharField(max_length=6, choices=ACTIONS_HISTORIC, default="DIS")
 
     # ? Ponto sendo trabalhado
 
@@ -92,7 +106,8 @@ class Historic(models.Model):
         ("T","transferido"),
         ("F","fundado"),
         ("P","penalizado"),
-        ("EP","entrou no ponto"),
+        ("EP","entrou na área do ponto"),
+        ("SP","saiu da área do ponto"),
         ("MB","movido para baixo"),
         ("MC","movido para cima"),
         ("ATT","atualizado"),
@@ -106,7 +121,7 @@ class Historic(models.Model):
     action = models.CharField(max_length=5, choices=ACTIONS_HISTORIC, default="ADD")
 
      # ? Motivo da ação
-    motive = models.CharField(max_length=300)
+    motive = models.CharField(max_length=300,null=True)
 
     # ? usuário que foi afetado
     suject = models.ForeignKey(User, on_delete=models.SET_DEFAULT , default=None, null=True)
@@ -130,21 +145,30 @@ class PointRow(models.Model):
     # ? Descrição das filas
 
     # ? ponto referente
-    point = models.ForeignKey(Point, on_delete=models.PROTECT)
+    point = models.ForeignKey(Point, on_delete=models.CASCADE)
     
     # ? ID Usuário na Fila 
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     
     # ? Posição em que se encontrava, se null é pq saiu da Fila
-    position = models.IntegerField()
+    position = models.IntegerField(default=1)
     date = models.DateTimeField(default = timezone.now)
 
     # ? Se o ping websocket está ativo
     online = models.BooleanField(default=False)
 
+    link_with_online = models.ForeignKey("consumer.Client",on_delete=models.CASCADE,default=None)
+
+
+    def last_position(self):
+        res = PointRow.objects.all().order_by("-position").first()
+        if res:
+            return res.position
+        else:
+            return 1
 
     def __str__(self):
-        return str(self.position)+" "+str(self.user_id)
+        return str(self.position)+" "+str(self.user.email)
 
 class PointEmployee(models.Model):
     CARGOS_POINT ={
@@ -167,3 +191,20 @@ class PointEmployee(models.Model):
 
     def __str__(self):
         return str(self.point.name)+" - "+self.function
+
+
+class Token(models.Model):
+    key = models.TextField(default=None, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    last_login = models.DateTimeField(default=None,null=True)
+
+    def is_valid(self):
+        # Check payload valid (based off of JSONWebTokenAuthentication,
+        # may want to refactor)
+        try:
+            _ = jwt_decode_handler(self.key)
+        except jwt.ExpiredSignature:
+            return False
+        except jwt.DecodeError:
+            return False
+        return True

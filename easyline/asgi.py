@@ -21,8 +21,8 @@ from task.routing import channels_urlspattern
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'easyline.settings')
 django.setup()
-from websocket.middlewares.channelsMiddleware import TokenAuthMiddleware
-import websocket.routing
+from consumer.middlewares.AuthMiddleware import TokenAuthMiddleware
+from consumer.routing import urlpatterns
 
 
 # application = get_asgi_application()
@@ -34,7 +34,7 @@ application = ProtocolTypeRouter({
     ),
     "websocket": TokenAuthMiddleware(
         URLRouter(
-            websocket.routing.url_patterns
+            urlpatterns
         )
     )
 })

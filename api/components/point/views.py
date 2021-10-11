@@ -111,7 +111,8 @@ class PointUserAction (APIView):
                     "name": x.point.name,
                     "owner_id": x.point.owner.id,
                     "onlines": models.PointEmployee.objects.filter(point=x.point).count(),
-                    "function": x.function
+                    "function": x.function,
+                    "local": x.point.local
                 } for x in pontos_trabalhados]})
         except Exception as ex:
             return Response({"message": _(str(ex))}, status=status.HTTP_400_BAD_REQUEST)

@@ -15,7 +15,6 @@ def setup():
     """
         Adicionar as tarefas disponíveis no database e executar ao iniciar o servidor
     """
-    # Registra as tarefas em todos os tenants
 
     channel_layer = get_channel_layer()
     # Inicia todas as tarefas de forma pausada

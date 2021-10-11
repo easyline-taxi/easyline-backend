@@ -69,9 +69,9 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'channels',
     'drf_yasg',
-    'websocket',
     "django_filters",
-    'task.apps.TaskConfig'
+    'task.apps.TaskConfig',
+    'consumer.apps.ConsumerConfig'
     
 ]
 
@@ -85,7 +85,7 @@ JWT_AUTH = {
     'JWT_VERIFY': True,
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 0,
-    'JWT_EXPIRATION_DELTA': timedelta(days=15),
+    'JWT_EXPIRATION_DELTA': timedelta(days=2),
 
     'JWT_ALLOW_REFRESH': True,
     'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=0),

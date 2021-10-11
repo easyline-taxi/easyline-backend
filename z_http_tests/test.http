@@ -1,11 +1,11 @@
-# @url =206.189.114.185:8000/api
 @url =127.0.0.1:8000/api
+# @url =127.0.0.1:8000/api
 @email = admin@easyline.com
 @pass = easyline@123
 
 @deviceid = 2123123
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzNDU5MDE1OCwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzMzI5NDE1OH0.ToA0dxTnVOwVTrIEbDIPnIMe28VrYAMTOmtVEnDaCB4
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo5LCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzNDU5NTQyMiwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzMzI5OTQyMn0.bc83SkuX5Wu9I-CK67rUttB_-wFkP-Njuic-a92rvjc
 
 @user_id = 2
 ###
@@ -63,23 +63,30 @@ Authorization: Bearer {{token}}
 {
   "coordinates": ["(1.96,4.57)","(6.38,7.09)","(7.76,0.49)","(1.72,0.23)","(0.2,3.29)"]
 }
-###
-
-GET http://127.0.0.1:8000/api/user/
-Authorization: Bearer {{token}}
 
 ###
 
-GET http://127.0.0.1:8000/api/user/historic/
-Authorization: Bearer {{token}}
-
-###
-
-GET http://127.0.0.1:8000/api/point/historic/
+GET http://{{url}}/user/
 Authorization: Bearer {{token}}
 
 
 ###
 
-GET http://127.0.0.1:8000/api/point/historic/{{user_id}}/getHistoricUserQrCode/
+GET http://{{url}}/point/
+Authorization: Bearer {{token}}
+
+###
+
+GET http://{{url}}/user/historic/
+Authorization: Bearer {{token}}
+
+###
+
+GET http://{{url}}/point/historic/
+Authorization: Bearer {{token}}
+
+
+###
+
+GET http://{{url}}/point/historic/{{user_id}}/getHistoricUserQrCode/
 Authorization: Bearer {{token}}

@@ -1,14 +1,19 @@
 from django.contrib import admin
-from api.models import User,Plan,Point,PointEmployee, HistoricPoint, HistoricUser, PointRow, DeviceId
+from api import models
 
 
 # Register your models here.
 
-admin.site.register(User)
-admin.site.register(Plan)
-admin.site.register(Point)
-admin.site.register(PointEmployee)
-admin.site.register(PointRow)
-admin.site.register(HistoricPoint)
-admin.site.register(HistoricUser)
-admin.site.register(DeviceId)
+admin.site.register(models.User)
+admin.site.register(models.Plan)
+admin.site.register(models.Point)
+admin.site.register(models.PointEmployee)
+admin.site.register(models.PointRow)
+admin.site.register(models.HistoricPoint)
+admin.site.register(models.HistoricUser)
+admin.site.register(models.DeviceId)
+
+class TokenAdmin(admin.ModelAdmin):
+    list_display = ['user','is_valid','last_login','key']
+
+admin.site.register(models.Token,TokenAdmin)
