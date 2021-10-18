@@ -14,7 +14,7 @@ RUN pip install -r requirements.txt --cache-dir /pip_cache
 
 
 
-# RUN chown -R www-data:www-data ./
+RUN chown -R www-data:www-data ./
 RUN chmod +x /app/start-server.sh
 
 STOPSIGNAL SIGTERM
