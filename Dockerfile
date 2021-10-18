@@ -1,9 +1,10 @@
 FROM python:3.8-buster
+
+
+RUN sudo apt-get update && sudo apt-get install sudo nginx binutils libproj-dev gdal-bin libgeos++ proj-bin -y --no-install-recommends
+
 RUN useradd appuser && usermod -aG sudo appuser
 USER appuser
-
-RUN sudo apt-get update && sudo apt-get install nginx binutils libproj-dev gdal-bin libgeos++ proj-bin -y --no-install-recommends
-
 
 COPY nginx.default /etc/nginx/sites-available/default
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
