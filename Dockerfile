@@ -1,7 +1,7 @@
 FROM python:3.8-buster
 
 
-RUN sudo apt-get update && sudo apt-get install sudo nginx binutils libproj-dev gdal-bin libgeos++ proj-bin -y --no-install-recommends
+RUN apt-get update && apt-get install sudo nginx binutils libproj-dev gdal-bin libgeos++ proj-bin -y --no-install-recommends
 
 RUN useradd appuser && usermod -aG sudo appuser
 USER appuser
