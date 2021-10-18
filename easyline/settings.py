@@ -256,24 +256,16 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': 'debug.log',
         },
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'WARNING',
     },
     'loggers': {
-         'django': {
+        'django': {
             'handlers': ['file'],
             'level': 'INFO',
             'propagate': True,
         },
     },
 }
-
