@@ -11,7 +11,7 @@ RUN mkdir -p /pip_cache
 COPY . .
 RUN pip install -r requirements.txt --cache-dir /pip_cache
 
-RUN chmod -R 777 ./app
+RUN chmod -R 777 .
 
 RUN chmod +x /app/start-server.sh
 
