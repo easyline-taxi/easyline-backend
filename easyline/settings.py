@@ -269,12 +269,11 @@ LOGGING = {
         'level': 'WARNING',
     },
     'loggers': {
-        'django': {
-            'handlers': ['console','file'],
+         'django': {
+            'handlers': ['file'],
             'level': 'INFO',
-            'propagate': False,
+            'propagate': True,
         },
-        
     },
 }
 
