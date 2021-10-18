@@ -1,11 +1,11 @@
-@url =127.0.0.1:8000/api
+@url =easyline.ml:8000/api
 # @url =127.0.0.1:8000/api
-@email = admin@easyline.com
-@pass = easyline@123
+@email = teste@gmail.com
+@pass = 123456789
 
-@deviceid = 2123123
+@deviceid = 35bc567f97342a35
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo5LCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzNDU5NTQyMiwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzMzI5OTQyMn0.bc83SkuX5Wu9I-CK67rUttB_-wFkP-Njuic-a92rvjc
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzNDY3MDA4OSwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzNDQ5NzI4OX0.9bPg06fW14pkdlDUP-M2f0-UayhqKACBfNbLGX3wByE
 
 @user_id = 2
 ###
@@ -23,13 +23,22 @@ content-type: application/json
 
 ###
 
+POST http://{{url}}/auth/refresh/ HTTP/1.1
+content-type: application/json
+
+{
+	"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxMCwidXNlcm5hbWUiOiJ0ZXN0ZUBnbWFpbC5jb20iLCJleHAiOjE2MzQ0OTAyNjQsImVtYWlsIjoidGVzdGVAZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQzMTc0NjR9.k0Tm0lULkF2EGixkQbMi81GI7_Iwiv0GAQ_sxwA0ydo"
+}
+
+###
+
 POST http://{{url}}/auth/login/ HTTP/1.1
 content-type: application/json
 
 {
 	"username": "{{email}}",
 	"password": "{{pass}}",
-	"deviceid":{{deviceid}}
+	"deviceid": {{deviceid}}
 }
 
 ###

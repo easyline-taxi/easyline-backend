@@ -19,6 +19,9 @@ from ..utils.utils import APIView
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
+import logging
+logger = logging.getLogger(__name__)
+
     
 class UserDataView(APIView):
 
@@ -78,7 +81,7 @@ class UserDataView(APIView):
             request.user.photo = b64image
             request.user.save()
         except Exception as ex:
-            pass
+            logger.error(ex)
 
         
         return Response({
@@ -134,7 +137,7 @@ class UserDataView(APIView):
 
             return Response({"message":"Update Sucessful" , "data":{'name':user.name,"email":user.email,"city":user.city,"country":user.country}})
         except Exception as ex:
-
+            logger.error(ex)
             # ? Senão retorna erro 404
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -162,6 +165,7 @@ class UserDataView(APIView):
             user.delete()
             return Response({"message":"Deleted Sucessful" })
         except Exception as ex:
+            logger.error(ex)
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
 

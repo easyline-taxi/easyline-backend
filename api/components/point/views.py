@@ -13,6 +13,9 @@ from api import models
 from ..utils.utils import APIView
 from api.components.user import serializers as user_serializer
 
+import logging
+logger = logging.getLogger(__name__)
+
 # class PointGerals(viewsets.ViewSet):
 #     serializer_class = None
 
@@ -75,6 +78,7 @@ class PointRegister(APIView):
                 models.PointEmployee.objects.create(deviceid=devices[0], point=point, function="A")
             return Response({"message": _("Point Created"), "data": {'name': point.name, "city": point.city, "country": point.country,'id':point.id}})
         except Exception as ex:
+            logger.error(ex)
             return Response({"message": _(str(ex))}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -115,6 +119,7 @@ class PointUserAction (APIView):
                     "local": x.point.local
                 } for x in pontos_trabalhados]})
         except Exception as ex:
+            logger.error(ex)
             return Response({"message": _(str(ex))}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, format=None):
@@ -144,6 +149,7 @@ class PointUserAction (APIView):
                 request.user.save()
                 return Response({"message": "Point Selected "+str(request.user.point_id)})
         except Exception as ex:
+            logger.error(ex)
             return Response({"message": "Point does not exists " + str(request.data.get('id'))}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -182,7 +188,8 @@ class PointOwnerAction(APIView):
         # ? Pega o ponto atual
         try:
             point = models.Point.objects.get(pk=request.user.point_id)
-        except Exception:
+        except Exception as ex:
+            logger.error(ex)
             return Response({"message": "Você não está vinculado a um ponto"},status=status.HTTP_403_FORBIDDEN)
 
         # ? verifica se o usuário é dono do ponto atual
@@ -206,6 +213,7 @@ class PointOwnerAction(APIView):
         try:
             polygon= Polygon(tuple(coords))
         except Exception as ex:
+            logger.error(ex)
             return Response({"message": "Polígono mal formado."},status=status.HTTP_400_BAD_REQUEST)
 
         point.local = coords
@@ -344,6 +352,7 @@ class PointOwnerUserAction(APIView):
         try:
             device = models.DeviceId.objects.filter(deviceid=request.data.get("deviceid")).order_by('-last_used')[0]
         except Exception as ex:
+            logger.error(ex)
             return Response({"message": "DeviceId inválido"},status=status.HTTP_400_BAD_REQUEST)
         
         # ? TODO: Adicionar nos EMPLOYEEs
