@@ -1,6 +1,8 @@
 FROM python:3.8-buster
+RUN useradd appuser && usermod -aG sudo appuser
+USER appuser
 
-RUN apt-get update && apt-get install nginx binutils libproj-dev gdal-bin libgeos++ proj-bin -y --no-install-recommends
+RUN sudo apt-get update && apt-get install nginx binutils libproj-dev gdal-bin libgeos++ proj-bin -y --no-install-recommends
 
 
 COPY nginx.default /etc/nginx/sites-available/default
@@ -15,8 +17,8 @@ RUN pip install -r requirements.txt --cache-dir /pip_cache
 
 
 # RUN chown -R www-data:www-data ./
-RUN useradd appuser && chown -R appuser /app
-USER appuser
+RUN chown -R appuser /app
+
 RUN chmod +x /app/start-server.sh
 
 STOPSIGNAL SIGTERM
