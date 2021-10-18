@@ -2,7 +2,7 @@ FROM python:3.8-buster
 RUN useradd appuser && usermod -aG sudo appuser
 USER appuser
 
-RUN sudo apt-get update && apt-get install nginx binutils libproj-dev gdal-bin libgeos++ proj-bin -y --no-install-recommends
+RUN sudo apt-get update && sudo apt-get install nginx binutils libproj-dev gdal-bin libgeos++ proj-bin -y --no-install-recommends
 
 
 COPY nginx.default /etc/nginx/sites-available/default
