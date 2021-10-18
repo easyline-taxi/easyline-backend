@@ -125,6 +125,8 @@ class PointUserAction (APIView):
     def post(self, request, format=None):
         """
             Escolhe qual ponto será trabalhado e ativado pelo usuário
+
+            --
         """
 
         # ENVIO DE LOG DO BOT DISCORD
@@ -144,8 +146,8 @@ class PointUserAction (APIView):
             pontos_trabalhados = models.PointEmployee.objects.all().filter(deviceid=devices[0])
             ponto_selecionado = [
                 x for x in pontos_trabalhados if str(x.point.id) == str(request.data.get('id'))]
-            if ponto_selecionado != None:
-                request.user.point_id = ponto_selecionado[0].point.id
+            if ponto_selecionado:
+                request.user.point_id = ponto_selecionado.first().point.id
                 request.user.save()
                 return Response({"message": "Point Selected "+str(request.user.point_id)})
         except Exception as ex:
