@@ -1,11 +1,11 @@
-@url =easyline.ml:8000/api
-# @url =127.0.0.1:8000/api
-@email = teste@gmail.com
-@pass = 123456789
+# @url =easyline.ml/api
+@url =127.0.0.1:8000/api
+@email = teste1@gmail.com
+@pass = sdasdasd
 
-@deviceid = 35bc567f97342a35
+@deviceid = 312312312
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImFkbWluQGVhc3lsaW5lLmNvbSIsImV4cCI6MTYzNDY3MDA4OSwiZW1haWwiOiJhZG1pbkBlYXN5bGluZS5jb20iLCJvcmlnX2lhdCI6MTYzNDQ5NzI4OX0.9bPg06fW14pkdlDUP-M2f0-UayhqKACBfNbLGX3wByE
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxMCwidXNlcm5hbWUiOiJ0ZXN0ZUBnbWFpbC5jb20iLCJleHAiOjE2MzQ2NzY2NjgsImVtYWlsIjoidGVzdGVAZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzQ1MDM4Njh9.OaQkpeESC8hGpXFkn2d-PdrjZysOgOWOqbk-8CdxzL4
 
 @user_id = 2
 ###
@@ -14,7 +14,7 @@ content-type: application/json
 
 {
 	"email": "{{email}}",
-	"deviceid":{{deviceid}},
+	"deviceid":"{{deviceid}}",
  	"name":"Admin",
 	"cpf":"32132132132",
 	"password": "{{pass}}",
@@ -37,8 +37,9 @@ content-type: application/json
 
 {
 	"username": "{{email}}",
-	"password": "{{pass}}",
-	"deviceid": {{deviceid}}
+	"deviceid": "{{deviceid}}",
+	"password": "{{pass}}"
+	
 }
 
 ###
@@ -60,7 +61,7 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-	"id":1
+	"id":3
 }
 
 ###

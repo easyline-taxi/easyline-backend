@@ -144,12 +144,13 @@ class PointUserAction (APIView):
             devices = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')
             # ? Procura os pontos trabalhados
             pontos_trabalhados = models.PointEmployee.objects.all().filter(deviceid=devices[0])
-            ponto_selecionado = [
-                x for x in pontos_trabalhados if str(x.point.id) == str(request.data.get('id'))]
+            logger.info(pontos_trabalhados)
+            ponto_selecionado = pontos_trabalhados.filter(point=request.data.get('id'))
             if ponto_selecionado:
                 request.user.point_id = ponto_selecionado.first().point.id
                 request.user.save()
                 return Response({"message": "Point Selected "+str(request.user.point_id)})
+            return Response({"message": "Point does not exists " + str(request.data.get('id'))}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as ex:
             logger.error(ex)
             return Response({"message": "Point does not exists " + str(request.data.get('id'))}, status=status.HTTP_400_BAD_REQUEST)

@@ -1,9 +1,10 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import serializers
+from rest_framework import serializers,exceptions
 from django.utils import timezone
-
+import os
+import sys
 # ! Acessos do App
 from api import models
 
@@ -13,6 +14,9 @@ from rest_framework_jwt.serializers import JSONWebTokenSerializer as jsontokense
 from django.utils.translation import ugettext as _
 from rest_framework_jwt.settings import api_settings
 from rest_framework.permissions import AllowAny
+
+import logging
+logger = logging.getLogger(__name__)
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -40,14 +44,19 @@ class UserSerializerRegister(serializers.HyperlinkedModelSerializer):
         
         # ? Validação da SENHA
         if confirm_password != validated_data.get('password'):
-            raise Exception('Senhas não são iguais')
+            raise exceptions.ValidationError('Senhas não são iguais')
         
         # ? Validação do CPF
         cpfValidado = models.User.cpfValidator(None, validated_data.get('cpf'))
         if cpfValidado:
             validated_data['cpf'] = cpfValidado
-            user = models.User.objects.create_user(**validated_data,username=validated_data.get('email'))
+            validated_data['username'] = validated_data.get('email')
+            print(type(validated_data), validated_data)
+            
+            user = models.User.objects.create_user(**validated_data)
+            
             # vincula device id ao usuário
+            logger.warning(user)
             if len(models.DeviceId.objects.filter(deviceid=deviceid)):
                 # ! Possivelmente usuário está logando no celular de outro usuário (Como tratar?)
                 user.delete()
@@ -59,6 +68,7 @@ class UserSerializerRegister(serializers.HyperlinkedModelSerializer):
         # 
         # Retorna o user criado
         # 
+        
         return user
 
 # TODO fazer um desvinculador de device ID só pra admin
@@ -111,13 +121,16 @@ class RegisterUsers(APIView):
 
         serializer = UserSerializerRegister(data =request.data)
         serializer.is_valid(raise_exception=True)
+        user = serializer.create(validated_data = serializer.data)
         try:
-            user = serializer.create(validated_data = serializer.validated_data)
             # Cria o token
             models.Token.objects.create(user=user)
             return Response({"Nome": user.name,"Email":user.email})
         except Exception as ex:
-                
+            logger.info(ex)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -170,6 +183,7 @@ class JSONWebTokenSerializer0(jsontokenserializer):
             msg = _('Must include "{username_field}" and "password".')
             msg = msg.format(username_field=self.username_field)
             raise serializers.ValidationError(msg)
+            
 class ObtainJSONWebToken(obtjsontoken):
     permission_classes = [AllowAny]
     authentication_classes=[]

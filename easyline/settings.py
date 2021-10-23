@@ -120,8 +120,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ),
+        'rest_framework.authentication.BasicAuthentication'
+    )
 }
 
 
@@ -133,7 +133,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 ROOT_URLCONF = 'easyline.urls'
@@ -148,7 +148,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages'
             ],
         },
     },
@@ -254,6 +254,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
@@ -261,13 +271,13 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'WARNING',
+        'level': 'INFO',
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
-        },
-    },
+        }
+    }
 }

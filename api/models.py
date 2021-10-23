@@ -30,7 +30,7 @@ class User(AbstractUser,models.Model):
     }
 
     # ? Itens obrigatórios
-    email= models.EmailField(max_length=254, unique=True)
+    # email= models.EmailField(max_length=254, unique=True)
     cpf = models.CharField(max_length=11, unique=True,default="00000000000")
 
     # ? Itens não obrigatórios
@@ -41,8 +41,8 @@ class User(AbstractUser,models.Model):
     photo = models.TextField(null=True)
     active = models.BooleanField( default=True)
 
-    last_position = models.JSONField("Ultima Posição (Localização)", null=True)
-    last_position_time = models.DateTimeField(null=True,default=timezone.now)
+    last_position = models.JSONField(default={})
+    last_position_time = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=6, choices=ACTIONS_HISTORIC, default="DIS")
 
     # ? Ponto sendo trabalhado
