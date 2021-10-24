@@ -1,5 +1,8 @@
 from rest_framework.views import APIView
-
+from api import models
+from django.forms.models import model_to_dict
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 class APIView(APIView):
     def get_serializer_context(self):
         """
@@ -32,3 +35,25 @@ class APIView(APIView):
         serializer_class = self.get_serializer_class()
         kwargs['context'] = self.get_serializer_context()
         return serializer_class(*args, **kwargs)
+
+
+def list_onlines(point):
+    return models.PointEmployee.objects.filter(point=point).count()
+        
+def list_points(point_employee):
+    # monta dict de respostas
+    y = model_to_dict(point_employee.point)
+    # y.update({"id": point_employee.point.id})
+    y.update({"function": point_employee.function})
+    y.update({"onlines": list_onlines(point_employee.point)})
+    return y
+
+def sendLogDiscord(request):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.send)('background-task', {
+        'type': 'send_message_discord', 
+        'user': request.user.email,
+        'action': request.method,
+        'from':request.META.get('REMOTE_ADDR'),
+        'url': request.get_full_path()
+        })

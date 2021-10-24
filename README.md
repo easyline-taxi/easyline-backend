@@ -5,7 +5,7 @@
 
 ### Autenticação é feita na URL de conexão
 
-ws://127.0.0.1:8000/ws/row/?authorization=Bearer <TOKEN JWT>
+ws://127.0.0.1:8000/ws/row/?authorization=Bearer TOKEN
 
 ### OBSERVAÇOES
 
@@ -36,7 +36,10 @@ PARAMS:
 {
     "action":"SET_LOCALE",
     "params": {
-        "coordinate":"(40.4196863603187,20.8270955825833)"
+        "coordinate":{
+      "latitude": 0,
+      "longitude": 0
+    }
         }
 }
 

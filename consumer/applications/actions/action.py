@@ -7,6 +7,7 @@ from django.db.models import Q
 import math
 from django.core import serializers
 from consumer import models as models_consumer
+from api.components.admin import serializers
 
 # Listar todas as actions habilitadas
 actions_list = ['SET_LOCALE','GET_ROW']
@@ -33,10 +34,10 @@ def CHECK_IF_IN_POLYGON(user:models.User,params = None):
     point = models.Point.objects.get(pk = user.point_id)
     if point.local:
         # pega o=poligono
-        area = Polygon(point.local)
+        area = Polygon(point.convert_local_in_points())
         centroid = area.centroid
-
-        distance = math.dist(centroid,user.last_position[0]) 
+        
+        distance = math.dist(centroid,(user.last_position.get('latitude'),user.last_position.get('longitude')))
 
         
         # prepara o poligono
@@ -44,7 +45,8 @@ def CHECK_IF_IN_POLYGON(user:models.User,params = None):
         
         fila = models.PointRow.objects.filter(user=user)
         # Verifica se está no ponto e nao está na fila
-        if area.contains(Point(user.last_position[0])):
+        print(user.convert_position_in_points())
+        if area.contains(Point(user.convert_position_in_points())):
             distance = 0
             in_local = True
             if user.status == "IND":
@@ -96,8 +98,12 @@ def SET_LOCALE(user,params):
     }
     
     """
-    coordinate = ast.literal_eval(params.get("coordinate"))
-    user.last_position = [coordinate]
+    
+    # coordinate = ast.literal_eval(params.get("coordinate"))
+    serializer = serializers.PointCoordinateSerializer(data=params.get("coordinate"))
+    serializer.is_valid(raise_exception=True)
+
+    user.last_position = serializer.data
     user.last_position_time = timezone.now()
     user.save()
     response = CHECK_IF_IN_POLYGON(user)

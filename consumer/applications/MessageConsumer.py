@@ -18,7 +18,10 @@ Example json comunicate
 {
     "action":"SET_LOCALE",
     "params": {
-        "coordinate":"(1.96,4.57)"
+        "coordinate":
+            {
+                
+            }
         }
 }
 

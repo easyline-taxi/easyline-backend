@@ -1,0 +1,48 @@
+
+@url =127.0.0.1:8000/api
+@email = teste2@gmail.com
+@pass = sdasdasd
+
+@deviceid = 312312312
+
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6InRlc3RlMkBnbWFpbC5jb20iLCJleHAiOjE2MzUyMDk1OTEsImVtYWlsIjoidGVzdGUyQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM1MDM2NzkxfQ.Dw4hDW65HChcsrI6fXoAUpMjMpkEzD3W-kCuQRbbB-U
+
+
+###
+
+POST http://{{url}}/auth/login/ HTTP/1.1
+content-type: application/json
+
+{
+	"username": "{{email}}",
+	"deviceid": {{deviceid}},
+	"password": "{{pass}}"
+	
+}
+###
+
+POST http://{{url}}/point/register/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+	"name":"Os Forasteiros 2",
+	"city":"Rio de Fevereiro",
+	"country":"RJ"
+}
+
+###
+
+GET http://{{url}}/point/
+Authorization: Bearer {{token}}
+
+###
+
+POST http://{{url}}/point/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+	"id":2
+}
+

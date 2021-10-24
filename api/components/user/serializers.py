@@ -4,23 +4,18 @@ from easyline.utils import genAction,genEmployee
 
 # ! Import from App
 from api import models
+from api.components.point import serializers as point_serializers
 
-class UserSerializerPut(serializers.HyperlinkedModelSerializer):
-    # photo = serializers.ImageField()
-    class Meta:
-        model = models.User
-        fields = ['vtr', "name","city","country","photo"]
 
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = models.User
-        fields = ['vtr', 'name',"city",'country']
+        fields = ['pk','vtr', "name","city","country","photo"]
 
 
-class UserHistoricSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HistoricUser
-        fields = '__all__'
+class UserDataPoints(serializers.Serializer):
+    user = UserSerializer()
+    points = point_serializers.PointSerializer(many=True)
 

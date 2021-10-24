@@ -9,8 +9,8 @@ import sys
 from api import models
 
 from django.contrib.auth import authenticate
-from rest_framework_jwt.views import ObtainJSONWebToken as obtjsontoken
-from rest_framework_jwt.serializers import JSONWebTokenSerializer as jsontokenserializer
+from rest_framework_jwt.views import ObtainJSONWebToken
+from rest_framework_jwt.serializers import JSONWebTokenSerializer
 from django.utils.translation import ugettext as _
 from rest_framework_jwt.settings import api_settings
 from rest_framework.permissions import AllowAny
@@ -57,10 +57,10 @@ class UserSerializerRegister(serializers.HyperlinkedModelSerializer):
             
             # vincula device id ao usuário
             logger.warning(user)
-            if len(models.DeviceId.objects.filter(deviceid=deviceid)):
-                # ! Possivelmente usuário está logando no celular de outro usuário (Como tratar?)
-                user.delete()
-                raise Exception("deviceId já vinculado a um usuário")
+            # if len(models.DeviceId.objects.filter(deviceid=deviceid)):
+            #     # ! Possivelmente usuário está logando no celular de outro usuário (Como tratar?)
+            #     user.delete()
+            #     raise Exception("deviceId já vinculado a um usuário")
             models.DeviceId.objects.create(deviceid=deviceid, user=user)
         else:
             raise Exception('Invalid CPF')
@@ -134,7 +134,7 @@ class RegisterUsers(APIView):
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class JSONWebTokenSerializer0(jsontokenserializer):
+class JSONWebTokenSerializer(JSONWebTokenSerializer):
     deviceid = serializers.CharField(max_length=150)
 
 
@@ -184,7 +184,7 @@ class JSONWebTokenSerializer0(jsontokenserializer):
             msg = msg.format(username_field=self.username_field)
             raise serializers.ValidationError(msg)
             
-class ObtainJSONWebToken(obtjsontoken):
+class ObtainJSONWebToken(ObtainJSONWebToken):
     permission_classes = [AllowAny]
     authentication_classes=[]
-    serializer_class = JSONWebTokenSerializer0
+    serializer_class = JSONWebTokenSerializer

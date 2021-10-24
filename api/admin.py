@@ -6,7 +6,6 @@ from api import models
 
 admin.site.register(models.User)
 admin.site.register(models.Plan)
-admin.site.register(models.Point)
 admin.site.register(models.PointEmployee)
 admin.site.register(models.PointRow)
 admin.site.register(models.HistoricPoint)
@@ -15,5 +14,8 @@ admin.site.register(models.DeviceId)
 
 class TokenAdmin(admin.ModelAdmin):
     list_display = ['user','is_valid','last_login','key']
+class PointAdmin(admin.ModelAdmin):
+    list_display = ['id','name','owner']
+admin.site.register(models.Point,PointAdmin)
 
 admin.site.register(models.Token,TokenAdmin)

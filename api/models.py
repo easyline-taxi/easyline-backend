@@ -1,9 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 import jwt
 from rest_framework_jwt.settings import api_settings
-from rest_framework import serializers
 jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 from djongo import models 
+from django.db import models as django_models
 
 # from django.db import models
 from django.utils import timezone
@@ -19,6 +19,7 @@ def user_directory_path(instance, filename):
 #     print(filename)
 #     return 'images/user_{0}'.format(filename)
     return 'user_{0}/{1}'.format(instance.user.id, filename)
+
 class User(AbstractUser,models.Model):
     # ?: Dados armazenados dos usuários
 
@@ -34,7 +35,7 @@ class User(AbstractUser,models.Model):
     cpf = models.CharField(max_length=11, unique=True,default="00000000000")
 
     # ? Itens não obrigatórios
-    vtr = models.IntegerField(default=None, blank=True)
+    vtr = models.IntegerField(default=None, blank=True, null=True)
     name = models.CharField(max_length=300, blank=True)
     city = models.CharField(max_length=100, blank= True, null=True)
     country = models.CharField(max_length=100, blank= True, null=True)
@@ -45,6 +46,9 @@ class User(AbstractUser,models.Model):
     last_position_time = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=6, choices=ACTIONS_HISTORIC, default="DIS")
 
+    def convert_position_in_points(self):
+        if self.last_position:
+            return tuple((self.last_position.get('latitude',None),self.last_position.get('longitude',None)))
     # ? Ponto sendo trabalhado
 
     point_id=models.IntegerField(null=True)
@@ -79,7 +83,6 @@ class Plan(models.Model):
     name = models.CharField(default="Free", max_length=200)
     value  = models.IntegerField(default = 0)
     on_created = models.DateField(default=timezone.now)
-    permissions = models.JSONField(default={})
 
 class Point(models.Model):
     # ? descrição do modelo de dados dos Pontos de Taxi
@@ -91,11 +94,14 @@ class Point(models.Model):
     plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True)
 
     # ? Dados do ponto
-    local = models.JSONField(default={})
+    local = models.JSONField(blank=True, null=True,default={})
     name = models.CharField(max_length=200)
     city = models.CharField(max_length=50,null=True,blank=True)
     country = models.CharField(max_length=100, blank= True, null=True)
 
+    def convert_local_in_points(self):
+        if self.local:
+            return tuple(map(lambda x: (x.get('latitude',None),x.get('longitude',None)), self.local))
     def __str__(self):
         return self.name
 

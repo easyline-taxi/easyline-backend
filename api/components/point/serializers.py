@@ -5,36 +5,23 @@ from django.utils import timezone
 from api import models
 
 
-class PointRegisterSerializer(serializers.HyperlinkedModelSerializer):
+class PointRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Point
-        fields = ['name','plan','city','country']
+        exclude = ['owner','local']
 
-class PointActions(serializers.HyperlinkedModelSerializer):
+class PointSerializer(serializers.ModelSerializer):
+    onlines = serializers.IntegerField(default=0)
+    function = serializers.CharField(default="n")
     class Meta:
         model = models.Point
-        fields = ['name','plan','city','country']
+        fields = ['pk','name', "owner_id","onlines","function"]
 
-class PointOwnerActionSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = models.User
-        fields = ['email']
+class PointListSerializer(serializers.Serializer):
+    points = PointSerializer(many=True)
 
-class PointUserActionSerializer(serializers.HyperlinkedModelSerializer):
-    id = serializers.CharField(max_length=200)
-    class Meta:
-        model = models.Point
-        fields = ['id']
 
-class PointOwnerActionSerializerPolygon(serializers.Serializer):
-    coordinates = serializers.JSONField(default=[])
-
-class PointHistoricSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HistoricPoint
-        fields = '__all__'
-
-    
-
+class PointUserActionSerializer(serializers.Serializer):
+    point = PointSerializer()
 

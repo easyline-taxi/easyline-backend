@@ -12,7 +12,9 @@ urlpatterns = [
     path('auth/register/',views.RegisterUsers.as_view()),
     path('user/',include('api.components.user.urls')),
     path('point/',include('api.components.point.urls')),
-    path('plan/',include('api.components.plan.urls'))
+    path('plan/',include('api.components.plan.urls')),
+    path('historic/',include('api.components.historic.urls')),
+    path('admin/',include('api.components.admin.urls'))
     # path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 
