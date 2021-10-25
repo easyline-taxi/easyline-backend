@@ -16,6 +16,7 @@ from rest_framework_jwt.settings import api_settings
 from rest_framework.permissions import AllowAny
 
 import logging
+import traceback
 logger = logging.getLogger(__name__)
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -52,8 +53,11 @@ class UserSerializerRegister(serializers.HyperlinkedModelSerializer):
             validated_data['cpf'] = cpfValidado
             validated_data['username'] = validated_data.get('email')
             print(type(validated_data), validated_data)
-            
-            user = models.User.objects.create_user(**validated_data)
+            try:
+                user = models.User.objects.create_user(**validated_data)
+            except Exception as ex:
+                logger.error(traceback.format_exc())
+                raise exceptions.ValidationError({"message":"Usuário não criado", "error": "Usuário Existente"})
             
             # vincula device id ao usuário
             logger.warning(user)
@@ -62,14 +66,11 @@ class UserSerializerRegister(serializers.HyperlinkedModelSerializer):
             #     user.delete()
             #     raise Exception("deviceId já vinculado a um usuário")
             models.DeviceId.objects.create(deviceid=deviceid, user=user)
+            return user
         else:
-            raise Exception('Invalid CPF')
-        
-        # 
-        # Retorna o user criado
-        # 
-        
-        return user
+            raise exceptions.ValidationError({"message":"Usuário não criado", "error": "CPF invalidado"})
+
+        raise exceptions.ValidationError({"message":"Usuário não criado", "error": "Não houve sucesso"})
 
 # TODO fazer um desvinculador de device ID só pra admin
 
