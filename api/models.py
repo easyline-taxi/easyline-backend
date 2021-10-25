@@ -163,7 +163,7 @@ class PointRow(models.Model):
     # ? Se o ping websocket está ativo
     online = models.BooleanField(default=False)
 
-    link_with_online = models.ForeignKey("consumer.Client",on_delete=models.CASCADE,default=None)
+    # link_with_online = models.ForeignKey("consumer.Client",on_delete=models.CASCADE,default=None)
 
 
     def last_position(self):
