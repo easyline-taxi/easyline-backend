@@ -1,11 +1,11 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth import get_user_model
 import uuid
 
 # ! External Model
-from api.models import User
-
+User = get_user_model()
 class Client(models.Model):
     # Client Websocket
     user = models.ForeignKey(User, on_delete=models.CASCADE)
