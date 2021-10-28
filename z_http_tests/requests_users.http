@@ -1,5 +1,5 @@
-@url =easyline.ml/api
-# @url =127.0.0.1:8000/api
+# @url =easyline.ml/api
+@url =127.0.0.1:8000/api
 @email = teste10@gmail.com
 @pass = sdasdasd
 
@@ -16,7 +16,7 @@ content-type: application/json
 	"email": "{{email}}",
 	"deviceid":{{deviceid}},
  	"name":"Admin",
-	"cpf":"32132132142",
+	"cpf":"12312312345",
 	"password": "{{pass}}",
 	"confirm_password": "{{pass}}"
 }
