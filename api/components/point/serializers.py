@@ -14,9 +14,10 @@ class PointRegisterSerializer(serializers.ModelSerializer):
 class PointSerializer(serializers.ModelSerializer):
     onlines = serializers.IntegerField(default=0)
     function = serializers.CharField(default="n")
+    id = serializers.IntegerField()
     class Meta:
         model = models.Point
-        fields = ['pk','name', "owner_id","onlines","function"]
+        fields = ['id','name', "owner_id","onlines","function"]
 
 class PointListSerializer(serializers.Serializer):
     points = PointSerializer(many=True)
