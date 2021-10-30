@@ -1,5 +1,5 @@
-@url =easyline.ml/api
-# @url =127.0.0.1:8000/api
+# @url =easyline.ml/api
+@url =127.0.0.1:8000/api
 @email = teste10@gmail.com
 @pass = sdasdasd
 

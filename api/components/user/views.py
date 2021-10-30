@@ -65,7 +65,7 @@ class UserDataView(APIView):
         #     # ! se não tiver device id registrado neste user REGISTRAR OUTRO DEVICE ID NELE
         #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)  
         
-        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')[0]
+        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
 
         # ? Procura os pontos trabalhados
         pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device,deviceid__user=request.user)
