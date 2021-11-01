@@ -79,7 +79,7 @@ class MessageConsumer(JsonWebsocketConsumer):
         
             if action.actions_exists(action=data.get('action')):
                 response = getattr(action, data.get("action"))(user, data.get("params"))
-
+                response['action'] = data.get("action")
             self.send_json(response)
 
         except Exception as ex:
