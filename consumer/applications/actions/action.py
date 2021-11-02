@@ -5,7 +5,7 @@ from api import models
 from django.contrib.gis.geos import Polygon, Point
 from django.db.models import Q
 import math
-from django.core import serializers
+from django.core import serializers as djserializers
 from consumer import models as models_consumer
 from api.components.admin import serializers
 
@@ -119,6 +119,6 @@ def GET_ROW(user,params):
 
     point = models.Point.objects.get(pk = user.point_id)
     row_pos = models.PointRow.objects.filter(point=point, user__status="DIS")
-    response = serializers.serialize("json", row_pos)
+    response = djserializers.serialize("json", row_pos)
 
     return {"detail": "usuários", "response": response, "user": user.id}
