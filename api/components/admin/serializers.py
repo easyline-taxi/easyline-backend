@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
+from rest_framework.fields import JSONField
 
 # ! Imports from App
 from api import models
@@ -56,6 +57,12 @@ class PointSerializer(serializers.ModelSerializer):
         model = models.Point
         fields = ['pk','name', "owner_id","onlines","function"]
 
+
+class PointGetOwnerSerializer(serializers.ModelSerializer):
+    local = serializers.JSONField()
+    class Meta:
+        model = models.Point
+        fields = '__all__'
 class PointListSerializer(serializers.Serializer):
     points = PointSerializer(many=True)
 

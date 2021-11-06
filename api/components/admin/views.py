@@ -30,9 +30,32 @@ class PointOwnerAction(APIView):
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == "PUT":
             return serializers.CoordinateSerializer
+        if self.request.method == "GET":
+            return serializers.PointGetOwnerSerializer
         else:
             return serializers.PointOwnerActionSerializer
 
+    
+    def get(self,request,format=None):
+        """
+            Pega os dados do ponto pelo admin (Apenas Admin)
+
+            __
+
+        """
+        # ENVIO DE LOG DO BOT DISCORD
+        sendLogDiscord(request)
+        point = models.Point.objects.get(pk=request.user.point_id)
+
+        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
+        p = models.PointEmployee.objects.filter(
+            deviceid=device, function="A", point__id = point.id).first()
+
+        if p:
+            serializer = serializers.PointGetOwnerSerializer(instance=point)
+
+            return Response({"message": "Ponto Salvo", "data":serializer.data})
+        return Response({"message": "Sem autorização neste ponto"},status=status.HTTP_400_BAD_REQUEST)
     def put(self,request, format=None):
         """
             Seta as coodernadas do polygono

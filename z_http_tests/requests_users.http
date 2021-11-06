@@ -1,11 +1,11 @@
 # @url =easyline.ml/api
 @url =127.0.0.1:8000/api
-@email = teste10@gmail.com
+@email = teste@gmail.com
 @pass = sdasdasd
 
 @deviceid = 312312312
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6InRlc3RlMkBnbWFpbC5jb20iLCJleHAiOjE2MzUyMDExMjUsImVtYWlsIjoidGVzdGUyQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM1MDI4MzI1fQ.DBpAeIHccAdmnNoFZN8jmGEhn3a9zFUTuhOs582hdIU
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo3LCJ1c2VybmFtZSI6InRlc3RlMTBAZ21haWwuY29tIiwiZXhwIjoxNjM1NzMzOTMyLCJlbWFpbCI6InRlc3RlMTBAZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzU1NjExMzJ9.RWefXq_3AzfWeJjuYXuOryrig0vHh_P8OTDjYZKHl-w
 
 @user_id = 2
 ###
