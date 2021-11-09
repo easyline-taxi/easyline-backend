@@ -10,7 +10,7 @@ from api.components.point import serializers as point_serializers
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    cpf = serializers.CharField()
+    cpf = serializers.CharField(read_only=True)
     class Meta:
         model = models.User
         fields = ['pk','vtr', "name","city","country","photo","email","cpf"]

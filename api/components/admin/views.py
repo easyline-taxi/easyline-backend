@@ -55,7 +55,7 @@ class PointOwnerAction(APIView):
             serializer = serializers.PointGetOwnerSerializer(instance=point)
 
             return Response({"message": "Ponto Salvo", "data":serializer.data})
-        return Response({"message": "Sem autorização neste ponto"},status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "Você não é Administrador desse ponto: " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
     def put(self,request, format=None):
         """
             Seta as coodernadas do polygono
@@ -78,17 +78,24 @@ class PointOwnerAction(APIView):
         if len(serializer.data.get('coordinates')) <3 and len(serializer.data.get("coordinates"))>6:
             return Response({"message": "Polígono mal formado, deve ter 3 a 5 pontos."},status=status.HTTP_400_BAD_REQUEST)
 
-        logger.info(serializer.data.get("coordinates"))
-        coords = map(lambda x: (x.get('latitude',None),x.get('longitude',None)), serializer.data.get("coordinates"))
-        try:
-            polygon= Polygon(tuple(coords))
-        except Exception as ex:
-            logger.error(ex)
-            return Response({"message": "Polígono mal formado."},status=status.HTTP_400_BAD_REQUEST)
+        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
+        p = models.PointEmployee.objects.filter(
+            deviceid=device, function="A", point__id = point.id).first()
+        if p:
 
-        point.local = list(serializer.data.get('coordinates'))
-        point.save()
-        return Response({"message": "Ponto Salvo", "data":model_to_dict(point)})
+            logger.info(serializer.data.get("coordinates"))
+            coords = map(lambda x: (x.get('latitude',None),x.get('longitude',None)), serializer.data.get("coordinates"))
+            try:
+                polygon= Polygon(tuple(coords))
+            except Exception as ex:
+                logger.error(ex)
+                return Response({"message": "Polígono mal formado."},status=status.HTTP_400_BAD_REQUEST)
+
+            point.local = list(serializer.data.get('coordinates'))
+            point.save()
+            return Response({"message": "Ponto Salvo", "data":model_to_dict(point)})
+        else:
+            return Response({"message": "Você não é Administrador desse ponto: " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, format=None):
         """ 
