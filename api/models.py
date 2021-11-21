@@ -179,7 +179,7 @@ class PointRow(models.Model):
     def move_position(self, position:int):
         if position >= 1 and position <= self.last_position() and self.position != position:
             if position > self.position:
-                others = PointRow.objects.filter(point = self.point, position__lte=position)
+                others = PointRow.objects.filter(point = self.point, position__gte=position)
                 for other in others:
                     other.position -= 1
                     other.save()
