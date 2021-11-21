@@ -24,5 +24,14 @@ class PointListSerializer(serializers.Serializer):
 
 
 class PointUserActionSerializer(serializers.Serializer):
-    point = PointSerializer()
+    point = serializers.IntegerField()
+    
+class GETPointRowUserActionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.PointRow
+        fields = '__all__'
 
+class PointRowUserActionSerializer(serializers.Serializer):
+    user = serializers.IntegerField()
+class PUTPointRowUserActionSerializer(PointRowUserActionSerializer):
+    position = serializers.IntegerField()

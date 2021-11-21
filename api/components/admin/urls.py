@@ -9,5 +9,7 @@ urlpatterns = [
     # ? adicionar user no ponto
     # ? Remover user do ponto
     path('actions/', views.PointOwnerUserAction.as_view()),
+    # ? Transferencias de cargos
+    path('transfer/', views.ChangeUserFunctionViewSet.as_view()),
     path('getHistoric/',views.HistoricPOintViewSet.as_view())
 ] 

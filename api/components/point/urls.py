@@ -17,5 +17,6 @@ urlpatterns = [
     # ? subir pessoa
     # ? descer pessoa
     # ? tripular
-    # ? entrar na fila
+    # ? Mostrar Fila
+    path('row/', views.PointRowAction.as_view())
 ] 

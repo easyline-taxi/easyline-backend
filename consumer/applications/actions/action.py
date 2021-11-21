@@ -8,9 +8,13 @@ import math
 from django.core import serializers as djserializers
 from consumer import models as models_consumer
 from api.components.admin import serializers
+from random import randint
+from time import sleep
 
 # Listar todas as actions habilitadas
-actions_list = ['SET_LOCALE','GET_ROW']
+actions_list = ['SET_LOCALE']
+
+#  ok FAZER A PARTE DE EVENTOS DE ATUALIZAÇÂO
 
 def actions_exists(action=None):
     if action.upper() in actions_list:
@@ -18,6 +22,14 @@ def actions_exists(action=None):
     else:
         return None
 
+def OFFILINE_POINT_ROW(user:models.User,params = None):
+    user.status = "IND"
+    user.save()
+    
+def ONLINE_POINT_ROW(user:models.User,params = None):
+    if user.status != "TRI":
+        user.status = "DIS"
+        user.save()
 
 
 def CHECK_IF_IN_POLYGON(user:models.User,params = None):
@@ -43,39 +55,35 @@ def CHECK_IF_IN_POLYGON(user:models.User,params = None):
         # prepara o poligono
         area = area.prepared
         
-        fila = models.PointRow.objects.filter(user=user)
+        fila = models.PointRow.objects.filter(user=user,point=point).first()
         # Verifica se está no ponto e nao está na fila
         print(user.convert_position_in_points())
         if area.contains(Point(user.convert_position_in_points())):
             distance = 0
             in_local = True
-            if user.status == "IND":
-                user.status = "DIS"
-                user.save()
+            if user.status == "DIS" and not fila:
                 models.HistoricUser.objects.create(user=user,action="ATT",suject=user,motive="Ficou Disponível (Dentro do Ponto)")
-
-            
-            if not fila:
                 #Entra na fila
-                row_pos = models.PointRow.objects.create(point=point,user=user,date=timezone.now(),online=True,link_with_online =models_consumer.Client.objects.get(user=user) )
-                row_pos.position = row_pos.last_position()
-                row_pos.save()
+                row_pos = models.PointRow.objects.create(point=point,user=user,date=timezone.now())
+                if not row_pos.position:
+                    row_pos.position = row_pos.last_position()
+                    row_pos.save()
+                
                 # Adiciona histórico
                 models.HistoricUser.objects.create(user=user,action="EP",suject=user)
 
                 # historico do ponto
                 models.HistoricPoint.objects.create(point=point,action="EP",suject=user)
-            
+                
+
             return {"in_local": in_local,"distance": distance,"position_row":models.PointRow.objects.get(user=user).position}
             
 
         else:
             in_local = False
+            
             # Trata se está saindo do ponto ou está entrando no ponto
             if fila:
-                # fora da
-                user.status = "IND"
-                user.save()
 
                 models.HistoricUser.objects.create(user=user,action="ATT",suject=user,motive="Ficou Indisponível (Fora do Ponto)")
                 models.HistoricPoint.objects.create(point=point,action="SP",suject=user)
@@ -94,7 +102,10 @@ def SET_LOCALE(user,params):
     Parametros Recebidos
 
     {
-        "coordinate":"(1.96,4.57)"
+        "coordinate":{
+            "latitude": 0,
+            "longitude": 0
+        }
     }
     
     """

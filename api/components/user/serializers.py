@@ -13,7 +13,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     cpf = serializers.CharField(read_only=True)
     class Meta:
         model = models.User
-        fields = ['pk','vtr', "name","city","country","photo","email","cpf"]
+        fields = ['pk','vtr', "name","city","country","photo","email","cpf","status"]
 
 class UserDataPoints(serializers.Serializer):
     user = UserSerializer()

@@ -36,11 +36,12 @@ class MessageConsumer(JsonWebsocketConsumer):
 
         if user.is_anonymous:
             # Se não estiver logado, vai ser desconectado
-            self.close(code=404)
+            self.close(code=1000)
         else:
 
             #  Se tiver login vai logar e entrar no canal público
             print(user.email+" Entrou >>")
+            getattr(action, "ONLINE_POINT_ROW")(user, None)
 
             # Salva o canal do usuário vinculado ao user
             Client.objects.create(user=user, channel=self.channel_name)
@@ -59,6 +60,7 @@ class MessageConsumer(JsonWebsocketConsumer):
             # saida do canal do usuário não autenticado
             print("Usuário Não Autenticado saiu")
         else:
+            getattr(action, "OFFILINE_POINT_ROW")(user, None)
 
             # Remove o usuário autenticado do canal público
             async_to_sync(self.channel_layer.group_discard)(
@@ -83,8 +85,23 @@ class MessageConsumer(JsonWebsocketConsumer):
             self.send_json(response)
 
         except Exception as ex:
-            print(str(ex))
-            self.close(str(ex))
+            print("error: ", ex)
+            self.close(code=3000)
+    
+    def send_event(self, event):
+        """Envia os alertas de eventos para os clients
+
+        Args:
+            event (any): Contem todo o json necessário com o evento correspondente
+        """
+       
+        # Handles the "public.message" event when it's sent to us.
+        self.send_json(json.loads(event["content"]))
+
+        # async_to_sync(channel_layer.send)(client.channel, {
+        #             "type": "send.event",
+        #             "content": json.dumps({"event":event_type, "send_at": timezone.now().strftime('%d-%m-%y %H-%M-%S')}),
+        #         })
 
     def public_message(self, event):
         # Envia para o grupo

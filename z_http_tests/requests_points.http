@@ -1,11 +1,11 @@
 
 @url =127.0.0.1:8000/api
-@email = teste2@gmail.com
-@pass = sdasdasd
+@email = myTesteradmin1@gmail.com
+@pass = mytester123
 
-@deviceid = 312312312
+@deviceid = 71637336233
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6InRlc3RlMkBnbWFpbC5jb20iLCJleHAiOjE2MzU3OTk4MTUsImVtYWlsIjoidGVzdGUyQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM1NjI3MDE1fQ.I6G94J2MGIn1kS1Y1LNS0qBErSBGPbvRBU3u4q5K0NA
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo5NCwidXNlcm5hbWUiOiJteVRlc3RlcnByYW5jaGV0ZWlybzFAZ21haWwuY29tIiwiZXhwIjoxNjM3NDY2NjE4LCJlbWFpbCI6Im15VGVzdGVycHJhbmNoZXRlaXJvMUBnbWFpbC5jb20iLCJvcmlnX2lhdCI6MTYzNzI5MzgxOH0.6BATupHNGXznGEF8kZ2ifeC2mP1c1m4e2TV2q_sxnp8
 
 
 ###
@@ -43,6 +43,22 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-	"id":2
+	"point":20
+}
+
+###
+
+GET http://{{url}}/point/row/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+POST http://{{url}}/point/row/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+	"user": 100
 }
 
