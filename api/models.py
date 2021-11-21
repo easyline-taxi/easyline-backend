@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 import jwt
 from rest_framework_jwt.settings import api_settings
+from rest_framework import exceptions
 jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 from djongo import models 
 from django.db import models as django_models
@@ -192,7 +193,9 @@ class PointRow(models.Model):
                 self.position = position
                 self.save()
             return True
-        return False
+        if position == self.position:
+            return True
+        raise exceptions.NotAcceptable("Posição inválida, deve estar entre {} e {}.".format(1,self.last_position()-1))
                 
         
 

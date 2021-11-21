@@ -235,18 +235,40 @@ class PointRowAction(APIView):
         pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device)
         point_trab = pontos_trabalhados.filter(point = request.user.point_id).first()
         if not point_trab:
-            return Response({"message": "Point não é trabalhado " + str(request.data.get('id'))},
+            return Response({"message": "Point não é trabalhado " + str(request.user.point_id)},
                                 status=status.HTTP_400_BAD_REQUEST)
         # ! Permission
         if point_trab.function == 'M':
             raise exceptions.PermissionDenied("Não tem autoriazação")
         
+        serializer = serializers.PUTPointRowUserActionSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
         
-        pass
-    
-    def delete(self, request, format=None):
-        """
-            Remove o usuário na fila  (> prancheteiro )
 
-            --
-        """
+        try:
+            user = models.User.objects.get(id = serializer.data.get('user'))
+            objeto_fila = models.PointRow.objects.get(user=user,point=point_trab.point)
+            
+            if objeto_fila.position >= serializer.data.get('position'):
+                aux_action = 'MC'
+                aux_motive = 'Movido para Cima'
+            else:
+                aux_action = 'MB'
+                aux_motive = 'Movido para Baixo'
+                
+           
+            
+        except Exception as ex:
+            logger.warning(ex)
+            raise exceptions.NotFound("Usuário com id {} não está na fila.".format(serializer.data.get('user')))
+        
+        objeto_fila.move_position(position=serializer.data.get('position'))
+            
+        models.HistoricPoint.objects.create(
+            point=point_trab.point, suject=user, motive=aux_motive, action=aux_action)
+        models.HistoricUser.objects.create(
+            user=request.user, suject=user, motive=aux_motive, action=aux_action)
+    
+        return Response({"message": "Usuário {} Movido com sucesso.".format(serializer.data.get('user'))})
+        
+    
