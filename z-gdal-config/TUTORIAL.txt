@@ -1,0 +1,1 @@
+https://www.pointsnorthgis.ca/blog/geodjango-gdal-setup-windows-10/
