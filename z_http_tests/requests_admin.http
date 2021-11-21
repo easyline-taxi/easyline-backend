@@ -5,7 +5,7 @@
 
 @deviceid = 00000000000
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6InRlc3RlMkBnbWFpbC5jb20iLCJleHAiOjE2MzUyMDI4NjAsImVtYWlsIjoidGVzdGUyQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM1MDMwMDYwfQ.bsZTVCgKekqb34AlJUiSXqxLkvOmta9RNoSeQRWHnQE
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1NywidXNlcm5hbWUiOiJteVRlc3RlcmFkbWluMUBnbWFpbC5jb20iLCJleHAiOjE2Mzc0NDMxNzcsImVtYWlsIjoibXlUZXN0ZXJhZG1pbjFAZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzcyNzAzNzd9.Hn7iq7m-ql4LCnwGcuKjtET0LqKU6Y1qjlmLzUIoS38
 
 
 ###
@@ -19,6 +19,12 @@ content-type: application/json
 	"deviceid": {{deviceid}}
 	
 }
+
+###
+
+GET http://{{url}}/admin/config/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
 
 ###
 
@@ -100,6 +106,19 @@ Authorization: Bearer {{token}}
 {
   "email": "admin@admin.com"
 }
+
+
+###
+
+PUT http://{{url}}/admin/transfer/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "function": "P",
+  "email": "myTesterprancheteiro1@gmail.com"
+}
+
 
 
 

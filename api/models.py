@@ -1,10 +1,12 @@
 from django.contrib.auth.models import AbstractUser
 import jwt
 from rest_framework_jwt.settings import api_settings
+from rest_framework import exceptions
 jwt_decode_handler = api_settings.JWT_DECODE_HANDLER
 from djongo import models 
 from django.db import models as django_models
 
+from django.db.models import Q
 # from django.db import models
 from django.utils import timezone
 import re
@@ -66,7 +68,7 @@ class User(AbstractUser,models.Model):
         return cpf
 
     def __str__(self):
-        return self.email
+        return str(self.email)
 
 class DeviceId(models.Model):
     deviceid= models.CharField(max_length=150, default="00000000000")
@@ -103,7 +105,7 @@ class Point(models.Model):
         if self.local:
             return tuple(map(lambda x: (x.get('latitude',None),x.get('longitude',None)), self.local))
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 class Historic(models.Model):
     # ?: Histórico padronizado do usuário para armazenamento de ações
@@ -112,6 +114,7 @@ class Historic(models.Model):
         ("T","transferido"),
         ("F","fundado"),
         ("P","penalizado"),
+        ("M", "mudança de cargo"),
         ("EP","entrou na área do ponto"),
         ("SP","saiu da área do ponto"),
         ("MB","movido para baixo"),
@@ -136,7 +139,7 @@ class Historic(models.Model):
     date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return self.motive
+        return str(self.motive)
 
 class HistoricPoint(Historic):
     # ?: Dados referente ao historico do Point
@@ -157,21 +160,44 @@ class PointRow(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     
     # ? Posição em que se encontrava, se null é pq saiu da Fila
-    position = models.IntegerField(default=1)
+    position = models.IntegerField(blank=True,null=True)
     date = models.DateTimeField(default = timezone.now)
 
-    # ? Se o ping websocket está ativo
-    online = models.BooleanField(default=False)
+    # # ? Se o ping websocket está ativo
+    # online = models.BooleanField(default=False)
 
     # link_with_online = models.ForeignKey("consumer.Client",on_delete=models.CASCADE,default=None)
 
 
     def last_position(self):
-        res = PointRow.objects.all().order_by("-position").first()
-        if res:
-            return res.position
+        res = PointRow.objects.filter(~Q(position=None),point = self.point).order_by("-position")
+        if len(res)>=1:
+            return (res[0].position)+1
         else:
             return 1
+    
+    def move_position(self, position:int):
+        if position >= 1 and position <= self.last_position() and self.position != position:
+            if position > self.position:
+                others = PointRow.objects.filter(point = self.point, position__gte=position)
+                for other in others:
+                    other.position -= 1
+                    other.save()
+                self.position = position
+                self.save()
+            else:
+                others = PointRow.objects.filter(point = self.point, position__lte=position)
+                for other in others:
+                    other.position += 1
+                    other.save()
+                self.position = position
+                self.save()
+            return True
+        if position == self.position:
+            return True
+        raise exceptions.NotAcceptable("Posição inválida, deve estar entre {} e {}.".format(1,self.last_position()-1))
+                
+        
 
     def __str__(self):
         return str(self.position)+" "+str(self.user.email)
@@ -196,7 +222,7 @@ class PointEmployee(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return str(self.point.name)+" - "+self.function
+        return str(self.point.name)+" - "+str(self.function)
 
 
 class Token(models.Model):
@@ -214,3 +240,19 @@ class Token(models.Model):
         except jwt.DecodeError:
             return False
         return True
+    
+
+from django.dispatch import receiver
+from asgiref.sync import async_to_sync
+from django.db.models.signals import post_save
+from channels.layers import get_channel_layer
+channel_layer = get_channel_layer()
+
+# SIGNALS DJANGO
+@receiver(post_save, sender=PointRow, dispatch_uid="save_alter_row_point")
+def save_alter_row_point(sender,instance,**kwargs):
+    async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_event_to_point',
+            'point':instance.point.id,
+            'event_type': "POINT_ROW_CHANGED"
+            })

@@ -23,6 +23,15 @@ class PointOwnerActionSerializer(serializers.HyperlinkedModelSerializer):
         model = models.User
         fields = ['email']
 
+class FunctionPointOwnerActionSerializer(serializers.Serializer):
+    CARGOS_POINT =(
+        ("M","motorista"),
+        ("P","prancheteiro")
+    )
+    function = serializers.ChoiceField(choices = CARGOS_POINT)
+    email = serializers.EmailField()
+    
+
 
     
 class AddUserToPoint(serializers.ModelSerializer):

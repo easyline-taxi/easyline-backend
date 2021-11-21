@@ -9,6 +9,9 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+from datetime import timedelta
+from pathlib import Path
+import os
 from dotenv import dotenv_values
 config = dotenv_values('.env')
 if not config.get('HOST'):
@@ -23,11 +26,6 @@ if not config.get('PASSDB'):
     config['PASSDB'] = ''
 
 
-import os
-from pathlib import Path
-
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -35,8 +33,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret! 
-SECRET_KEY = config.get('DJANGO_SECRET_KEY', 'django-insecure-j7!ppc90hmj8296s2wf1_)qgfv28&fq7p_o$ojp4sikg4g9-p*')
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = config.get(
+    'DJANGO_SECRET_KEY', 'django-insecure-j7!ppc90hmj8296s2wf1_)qgfv28&fq7p_o$ojp4sikg4g9-p*')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config.get('DJANGO_DEBUG', False)
@@ -47,14 +46,18 @@ ALLOWED_HOSTS = ['*']
 # GEO DJANGO
 
 if os.name == 'nt':
-    
-    VIRTUAL_ENV_BASE = os.environ['VIRTUAL_ENV']
-    os.environ['PATH'] = os.path.join(VIRTUAL_ENV_BASE, r'Lib\site-packages\osgeo') + ';' + os.environ['PATH']
-    os.environ['PROJ_LIB'] = os.path.join(VIRTUAL_ENV_BASE, r'Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
-    os.environ['GDAL_DATA'] = os.path.join(VIRTUAL_ENV_BASE,r"Lib\site-packages\osgeo\data\gdal")
-    GDAL_LIBRARY_PATH = os.path.join(VIRTUAL_ENV_BASE,r'Lib\site-packages\osgeo\gdal302.dll')
 
-# GEOS_LIBRARY_PATH = r'C:\OSGeo4W\bin\geos_c.dll' 
+    VIRTUAL_ENV_BASE = os.environ['VIRTUAL_ENV']
+    os.environ['PATH'] = os.path.join(
+        VIRTUAL_ENV_BASE, r'Lib\site-packages\osgeo') + ';' + os.environ['PATH']
+    os.environ['PROJ_LIB'] = os.path.join(
+        VIRTUAL_ENV_BASE, r'Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
+    os.environ['GDAL_DATA'] = os.path.join(
+        VIRTUAL_ENV_BASE, r"Lib\site-packages\osgeo\data\gdal")
+    GDAL_LIBRARY_PATH = os.path.join(
+        VIRTUAL_ENV_BASE, r'Lib\site-packages\osgeo\gdal302.dll')
+
+# GEOS_LIBRARY_PATH = r'C:\OSGeo4W\bin\geos_c.dll'
 # Application definition
 
 INSTALLED_APPS = [
@@ -72,11 +75,9 @@ INSTALLED_APPS = [
     "django_filters",
     'task.apps.TaskConfig',
     'consumer.apps.ConsumerConfig'
-    
+
 ]
 
-
-from datetime import timedelta
 
 # token Settings
 JWT_AUTH = {
@@ -111,7 +112,7 @@ SWAGGER_SETTINGS = {
 
 # Rest Framwork
 REST_FRAMEWORK = {
-  
+
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 
     'DEFAULT_PERMISSION_CLASSES': (
@@ -123,7 +124,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication'
     )
 }
-
 
 
 MIDDLEWARE = [
@@ -155,11 +155,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'easyline.wsgi.application'
-# 
+#
 ASGI_APPLICATION = "easyline.asgi.application"
-# 
-
-
+#
 
 
 # Database
@@ -174,11 +172,11 @@ DATABASES = {
         'ENGINE': 'djongo',
         'NAME': config.get('DATABASENAME'),
         'CLIENT': {
-                'host': config.get('HOST'),
-                # 'port': int(config.get('PORT')),
-                # 'username': config.get('USERDB'),
-                # 'password': config.get('PASSDB')
-            },
+            'host': config.get('HOST'),
+            # 'port': int(config.get('PORT')),
+            # 'username': config.get('USERDB'),
+            # 'password': config.get('PASSDB')
+        },
     }
 }
 
@@ -190,7 +188,6 @@ CHANNEL_LAYERS = {
         },
     },
 }
-
 
 
 # Password validation
@@ -212,8 +209,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -225,7 +220,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -233,12 +228,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-MEDIA_URL= '/media/'
+MEDIA_URL = '/media/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 
 
 AUTH_USER_MODEL = 'api.User'
@@ -250,6 +244,35 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Generate logging
+# from django.http import UnreadablePostError
+import traceback
+from django.utils import timezone
+import requests
+from tabulate import tabulate
+
+def skip_unreadable_post(record):
+    try:
+        if type(record.args) is tuple:
+            return True
+        exc_type, exc_value = record.exc_info[:2]
+        error = traceback.format_exc()
+        result = tabulate([["date",timezone.now().strftime('%d/%m/%y  %H:%M:%S')],["method",record.args.get('method')],["status",record.args.get('status')],["path",record.args.get('path')],["client",record.args.get('client')],["error",error]],tablefmt="grid")
+        payload = {
+                "content": result,
+                "tts": "true"
+            }
+        print(result)
+        if payload.get("content"):
+            header = {
+            "authorization": "Bot ODE4NDc2MjIxMjgwODEzMDg2.YEYnYQ.IRGH9F0DU4iIWOT7r9DdwZhzJnk"
+            }
+
+            r = requests.post("https://discord.com/api/v9/channels/818475844770070529/messages", data=payload,headers=header)   
+    except Exception as ex:
+        print("Exceptions from settings capture: ", ex)
+        
+    return True
+
 
 LOGGING = {
     'version': 1,
@@ -264,9 +287,17 @@ LOGGING = {
             'style': '{',
         },
     },
+    'filters': {
+        'skip_unreadable_posts': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': skip_unreadable_post,
+        }
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'level': 'WARNING',
+            'filters': ['skip_unreadable_posts'],
         },
     },
     'root': {
@@ -276,6 +307,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
+
             'level': 'INFO',
             'propagate': False,
         }

@@ -19,6 +19,6 @@ def sendMessage(message=None,request = None, user = None):
         async_to_sync(channel_layer.send)('background-task', {
             'type': 'send_message_discord', 
             'message': message,
-            'user': user.email,
+            'user': user.email if user else "Notify" ,
             'date': timezone.now().strftime("%m/%d/%Y, %H:%M:%S")
             })

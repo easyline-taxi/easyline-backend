@@ -20,7 +20,7 @@ from ..utils.utils import APIView,list_points,sendLogDiscord
 import logging
 logger = logging.getLogger(__name__)
 
-
+# TODO COMO TRANSFORMAR UM USUÀRIO EM PRANCHETEIRO?
 class PointOwnerAction(APIView):
 
     permission_classes = [permissions.IsOwner]
@@ -122,52 +122,7 @@ class PointOwnerAction(APIView):
             return Response({"message": "Point Deleted with Sucessful"})
         return Response({"message": "Você não é Administrador desse ponto: " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request, format=None):
-        """ 
-            Transferir ponto  (apenar Owner do ponto)
-
-            --
-        """
-        # TODO: TESTAR
-
-        # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
-
-
-        # ? get actual point 
-        point = models.Point.objects.get(pk=request.user.point_id)
-
-        serializer = serializers.PointOwnerActionSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        # ? pega o email do usuário que ele quer transferir
-        user = models.User.objects.get(email=request.data.get('email'))
-        target = models.DeviceId.objects.filter(user=user).order_by('-last_used').first()
-
-        #  ?: Verificar se o cara que ele quer transferir está no ponto
-        if not models.PointEmployee.objects.filter(point=point,deviceid=target).count():
-            return Response({"message": "Usuário não pertence a este ponto"},status=status.HTTP_400_BAD_REQUEST)
-
-        # ? Trasnfere a posse
-        point.owner = target.user
-        point.save()
-
-        # ? trocar as posições
-        
-        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
-        employee = models.PointEmployee.objects.filter(point=point,deviceid=device).first()
-        employee.function = "M"
-        employee.save()
-        employee = models.PointEmployee.objects.filter(point=point,deviceid=target).first()
-        employee.function = "A"
-        employee.save()
-
-        # ? adicionar no histórico do ponto e do usuário
-
-        models.HistoricPoint.objects.create(point=point, suject=request.user, motive="Transferência de Posse", action="T")
-        models.HistoricUser.objects.create(user=request.user, suject=target.user, motive="Transferência de Posse", action="T")
-
-        return Response({"message": "Ponto Transferido","data": model_to_dict(point)} )
+    
 
 class PointOwnerUserAction(APIView):
     # TODO: Setup Tests
@@ -180,6 +135,10 @@ class PointOwnerUserAction(APIView):
             return serializers.RemoveUserToPoint
         else:
             return serializers.AddUserToPoint
+        
+    @action(detail=False,methods=['post'])
+    def changeFunction(self, request, format=None):
+        return Response("Nada")
 
     def post(self, request, format=None):
         """
@@ -246,8 +205,10 @@ class PointOwnerUserAction(APIView):
         point = models.Point.objects.get(pk = request.user.point_id)
         
         # ! manda o email do cara
-        device = models.DeviceId.objects.filter(deviceid=serializer.data.get("suject").get('deviceid')).order_by('-last_used').first()
-
+        device = models.DeviceId.objects.filter(deviceid=serializer.data.get("suject").get('deviceid'),user__email=serializer.data.get("suject").get('email')).first()
+        
+        if not device:
+            raise exceptions.NotFound("Usuário não encontrado") 
         # ? TODO Verficiar se o usuário está no ponto
         
         if not len(models.PointEmployee.objects.filter(point=point,deviceid=device)):
@@ -292,3 +253,88 @@ class HistoricPOintViewSet(APIView):
         serializer_historic.is_valid(raise_exception=True)
         return Response({"message": "Historico Encontrado", "data":serializer_historic.data })
 
+class ChangeUserFunctionViewSet(APIView):
+    # TODO: Setup Tests
+
+    serializer_class = serializers.FunctionPointOwnerActionSerializer
+    permission_classes = [permissions.IsOwner]
+    
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.method == "POST":
+            return serializers.PointOwnerActionSerializer
+        else:
+            return self.serializer_class
+    
+    def put(self,request,format=None):
+        """ 
+            Mudar cargo  (apenar Owner do ponto)
+
+            --
+        """
+        
+        # ? get actual point 
+        point = models.Point.objects.get(pk=request.user.point_id)
+        serializer = serializers.FunctionPointOwnerActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = models.User.objects.get(email=request.data.get('email'))
+        target = models.DeviceId.objects.filter(user=user).order_by('-last_used').first()
+         #  ?: Verificar se o cara que ele quer transferir está no ponto
+        employee = models.PointEmployee.objects.filter(point=point,deviceid=target).first()
+        if not employee:
+            return Response({"message": "Usuário não pertence a este ponto"},status=status.HTTP_400_BAD_REQUEST)
+        print(serializer.data, request.data)
+        
+        employee.function = serializer.data.get('function')
+        employee.save()
+        models.HistoricUser.objects.create(user=request.user, suject=target.user, motive="Mudança de Cargo", action="M")
+        models.HistoricPoint.objects.create(point=point, suject=request.user, motive="Mudança de Cargo", action="M")
+        
+        return Response({"message":"Mudança de cargo com sucesso", "data": model_to_dict(employee)})
+
+    def post(self, request, format=None):
+        """ 
+            Transferir ponto  (apenar Owner do ponto)
+
+            --
+        """
+        # TODO: TESTAR
+
+        # ENVIO DE LOG DO BOT DISCORD
+        sendLogDiscord(request)
+
+
+        # ? get actual point 
+        point = models.Point.objects.get(pk=request.user.point_id)
+
+        serializer = serializers.PointOwnerActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # ? pega o email do usuário que ele quer transferir
+        user = models.User.objects.get(email=request.data.get('email'))
+        target = models.DeviceId.objects.filter(user=user).order_by('-last_used').first()
+
+        #  ?: Verificar se o cara que ele quer transferir está no ponto
+        if not models.PointEmployee.objects.filter(point=point,deviceid=target).count():
+            return Response({"message": "Usuário não pertence a este ponto"},status=status.HTTP_400_BAD_REQUEST)
+
+        # ? Trasnfere a posse
+        point.owner = target.user
+        point.save()
+
+        # ? trocar as posições
+        
+        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
+        employee = models.PointEmployee.objects.filter(point=point,deviceid=device).first()
+        employee.function = "M"
+        employee.save()
+        employee = models.PointEmployee.objects.filter(point=point,deviceid=target).first()
+        employee.function = "A"
+        employee.save()
+
+        # ? adicionar no histórico do ponto e do usuário
+
+        models.HistoricPoint.objects.create(point=point, suject=request.user, motive="Transferência de Posse", action="T")
+        models.HistoricUser.objects.create(user=request.user, suject=target.user, motive="Transferência de Posse", action="T")
+
+        return Response({"message": "Ponto Transferido","data": model_to_dict(point)} )
+        

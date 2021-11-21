@@ -22,6 +22,9 @@ def normalize_base64(photo_b64:str):
         return None
 
     if photo_b64.startswith('data:'):
+        re_b64 = re.compile(r'data:image\/[a-z]+;base64,')
+        b64_header = re_b64.findall(photo_b64)
+        type_file_b64 = b64_header[0].split(';')[0].split('/')[1]
         photo_b64 = re.sub(r'data:image\/[a-z]+;base64,', "",photo_b64)
     try:
         image = Image.open(io.BytesIO(base64.b64decode(photo_b64)))
@@ -36,9 +39,9 @@ def normalize_base64(photo_b64:str):
 
     # ?Convert do base64
     output = io.BytesIO()
-    image.save(output, format=image.format)
+    image.save(output, format=type_file_b64)
     b64 = base64.b64encode(output.getvalue()).decode('utf-8')
-    b64image = "data:image/"+image.format+";base64,"+b64
+    b64image = b64_header[0]+b64
     return b64image
 
 class UserDataView(APIView):
@@ -111,7 +114,15 @@ class UserDataView(APIView):
             # ? Verifica a validade dos campos
             serializer.is_valid(raise_exception=True)
             serializer.save()
-
+            if serializer.data.get('status',None) != 'DIS' and serializer.data.get('status',None) != None and request.user.point_id:
+                user_row = models.PointRow.objects.filter(user=request.user, point__id=request.user.point_id).first()
+                if user_row:
+                    user_row.move_position(user_row.last_position())
+                    user_row.delete()
+                    models.HistoricPoint.objects.create(
+                        point=user_row.point, suject=request.user, motive="Saiu da Fila", action="REM")
+                    models.HistoricUser.objects.create(
+                        user=request.user, suject=request.user, motive="Saiu da Fila", action="REM")
             # ? TODO: ADicionar no HIstorico do Usuário essas ALTERÇÔES
             models.HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
 
@@ -140,15 +151,3 @@ class UserDataView(APIView):
         except Exception as ex:
             logger.error(ex)
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
-
-    
-
-
-       
-    
