@@ -118,7 +118,7 @@ def SET_LOCALE(user,params):
     user.last_position_time = timezone.now()
     user.save()
     response = CHECK_IF_IN_POLYGON(user)
-    return {"detail": "LOCALIZAÇÃO ATUALIZADA", "response": response, "user": user.id}
+    return {"detail": "LOCATION_UPDATED", "response": response, "user": user.id}
 
 def GET_ROW(user,params):
     """
