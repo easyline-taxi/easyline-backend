@@ -5,7 +5,7 @@
 
 @deviceid = 71637336233
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo5NCwidXNlcm5hbWUiOiJteVRlc3RlcnByYW5jaGV0ZWlybzFAZ21haWwuY29tIiwiZXhwIjoxNjM3NDY2NjE4LCJlbWFpbCI6Im15VGVzdGVycHJhbmNoZXRlaXJvMUBnbWFpbC5jb20iLCJvcmlnX2lhdCI6MTYzNzI5MzgxOH0.6BATupHNGXznGEF8kZ2ifeC2mP1c1m4e2TV2q_sxnp8
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0LCJ1c2VybmFtZSI6Im15VGVzdGVycHJhbmNoZXRlaXJvMUBnbWFpbC5jb20iLCJleHAiOjE2Mzc2NzcxMjUsImVtYWlsIjoibXlUZXN0ZXJwcmFuY2hldGVpcm8xQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM3NTA0MzI1fQ.dPXFz8Ef52Bj7s3k5fSifJ79NEQQyo-vn3U2DP485_A
 
 
 ###
@@ -59,6 +59,18 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-	"user": 100
+	"user": 6
 }
+
+###
+
+PUT http://{{url}}/point/row/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+	"user": 5,
+	"position": 2
+}
+
 

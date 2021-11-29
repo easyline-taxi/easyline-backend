@@ -1,0 +1,8 @@
+DATABASENAME="easyline"
+HOST="mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false"
+REDIS_HOST="127.0.0.1"
+REDIS_PORT=6379
+DJANGO_LOG_LEVEL="INFO"
+DJANGO_DEBUG=True
+DJANGO_SECRET_KEY=xm4c3h+1b%4v$geh9-ud7tj#)u6iicr67y(h#25*uh#!_l#s3p
+DISCORD_TOKEN=ODE4NDc2MjIxMjgwODEzMDg2.YEYnYQ.IRGH9F0DU4iIWOT7r9DdwZhzJnk

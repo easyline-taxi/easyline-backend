@@ -2,6 +2,7 @@ import requests
 from random import randint
 
 url_base = "http://127.0.0.1:8000/api"
+# url_base = "http://easyline.ml/api"
 email_base = "myTester{}@gmail.com"
 name_base = "Nome examplo {}"
 password = "mytester123"

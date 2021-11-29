@@ -250,24 +250,24 @@ from django.utils import timezone
 import requests
 from tabulate import tabulate
 
+URL_BOT_DISCORD = config.get('DISCORD_URL', '127.0.0.1:65213')
+
 def skip_unreadable_post(record):
     try:
         if type(record.args) is tuple:
             return True
-        exc_type, exc_value = record.exc_info[:2]
+        # exc_type, exc_value = record.exc_info[:2]
         error = traceback.format_exc()
         result = tabulate([["date",timezone.now().strftime('%d/%m/%y  %H:%M:%S')],["method",record.args.get('method')],["status",record.args.get('status')],["path",record.args.get('path')],["client",record.args.get('client')],["error",error]],tablefmt="grid")
-        payload = {
-                "content": result,
-                "tts": "true"
-            }
-        print(result)
-        if payload.get("content"):
-            header = {
-            "authorization": "Bot ODE4NDc2MjIxMjgwODEzMDg2.YEYnYQ.IRGH9F0DU4iIWOT7r9DdwZhzJnk"
-            }
+        send={
+                "type": "Error",
+                "title": "error",
+                "description": result,
+                "color": "#e62956",
 
-            r = requests.post("https://discord.com/api/v9/channels/818475844770070529/messages", data=payload,headers=header)   
+            }
+            
+        requests.post("http://"+URL_BOT_DISCORD+"/",json=send)
     except Exception as ex:
         print("Exceptions from settings capture: ", ex)
         
@@ -296,7 +296,7 @@ LOGGING = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'level': 'WARNING',
+            'level': 'INFO',
             'filters': ['skip_unreadable_posts'],
         },
     },

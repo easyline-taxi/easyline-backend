@@ -1,0 +1,16 @@
+@url =localhost:65213/
+
+
+###
+
+POST http://{{url}} HTTP/1.1
+content-type: application/json
+
+{
+	"title":"Teste de ponte entre a aplicação",
+    "color": "0xfff",
+    "description": "Teste de ponte descripts",
+    "type": "logging",
+    "content": "content"
+	
+}

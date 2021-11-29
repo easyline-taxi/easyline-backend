@@ -6,6 +6,7 @@ from django.utils import timezone
 import logging
 import requests
 import json
+from django.conf import settings
 
 channel_layer = get_channel_layer()
 logger = logging.getLogger(__name__)
@@ -53,18 +54,15 @@ class BackgroundTaskConsumer(BaseTaskManager):
             # DEFINE A FUNÇÃO DA TAREFA AQUI
             # raise NotImplementedError()
             
-            payload = {
-                "content": "===========================\naction: {}\nuser: {}\nurl: {}\nfrom: {}\ndate: {}\ntime: {}\n===========================\n".format(message.get('action', None),message.get('user', None),message.get('url', None),message.get('from', None),timezone.now().date(),timezone.now().time()),
-                "tts": "true"
+            send={
+                "type": message.get('action', None),
+                "title": message.get('user', None),
+                "description": "{}\n{}".format(message.get('url', None),message.get('from', None)),
+                "color": message.get('color', "#f3faff"),
+
             }
-
             
-            if payload.get("content"):
-                header = {
-                "authorization": "Bot ODE4NDc2MjIxMjgwODEzMDg2.YEYnYQ.IRGH9F0DU4iIWOT7r9DdwZhzJnk"
-                }
-
-                r = requests.post("https://discord.com/api/v9/channels/818475844770070529/messages", data=payload,headers=header)
+            requests.post("http://"+settings.URL_BOT_DISCORD+"/",json=send)
 
             
 

@@ -10,10 +10,11 @@ from api.components.point import serializers as point_serializers
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    cpf = serializers.CharField(read_only=True)
+    cpf = serializers.CharField(required=False)
+    id = serializers.IntegerField(required=False)
     class Meta:
         model = models.User
-        fields = ['pk','vtr', "name","city","country","photo","email","cpf","status"]
+        fields = ['id','vtr', "name","city","country","photo","email","cpf","status"]
 
 class UserDataPoints(serializers.Serializer):
     user = UserSerializer()
