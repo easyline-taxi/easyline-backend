@@ -38,7 +38,7 @@ SECRET_KEY = config.get(
     'DJANGO_SECRET_KEY', 'django-insecure-j7!ppc90hmj8296s2wf1_)qgfv28&fq7p_o$ojp4sikg4g9-p*')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config.get('DJANGO_DEBUG', False)
+DEBUG = bool(config.get('DJANGO_DEBUG', False))
 
 ALLOWED_HOSTS = ['*']
 
