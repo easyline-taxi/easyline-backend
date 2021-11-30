@@ -61,8 +61,10 @@ class BackgroundTaskConsumer(BaseTaskManager):
                 "color": message.get('color', "#f3faff"),
 
             }
-            
-            requests.post("http://"+settings.URL_BOT_DISCORD+"/",json=send)
+            try:
+                requests.post("http://"+settings.URL_BOT_DISCORD+"/",json=send)
+            except Exception as ex:
+                pass
 
             
 

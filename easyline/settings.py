@@ -266,8 +266,10 @@ def skip_unreadable_post(record):
                 "color": "#e62956",
 
             }
-            
-        requests.post("http://"+URL_BOT_DISCORD+"/",json=send)
+        try:
+            requests.post("http://"+URL_BOT_DISCORD+"/",json=send)
+        except Exception as ex:
+            pass
     except Exception as ex:
         print("Exceptions from settings capture: ", ex)
         
