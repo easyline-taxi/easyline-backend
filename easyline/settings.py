@@ -248,9 +248,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 import traceback
 from django.utils import timezone
 import requests
+import threading
 from tabulate import tabulate
 
 URL_BOT_DISCORD = config.get('DISCORD_URL', '127.0.0.1:65213')
+def threading_send(send):
+    try:
+        requests.post("http://"+URL_BOT_DISCORD+"/",json=send)
+    except Exception as ex:
+        pass
+    return
 
 def skip_unreadable_post(record):
     try:
@@ -264,12 +271,9 @@ def skip_unreadable_post(record):
                 "title": "error",
                 "description": result,
                 "color": "#e62956",
-
             }
-        try:
-            requests.post("http://"+URL_BOT_DISCORD+"/",json=send)
-        except Exception as ex:
-            pass
+        x = threading.Thread(target=threading_send, args=(send,))
+        x.start()
     except Exception as ex:
         print("Exceptions from settings capture: ", ex)
         
@@ -309,7 +313,6 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-
             'level': 'INFO',
             'propagate': False,
         }
