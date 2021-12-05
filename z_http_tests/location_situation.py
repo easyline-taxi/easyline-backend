@@ -34,11 +34,11 @@ async def SET_LOCALE(uri):
                 print(response)
             except asyncio.TimeoutError:
                 pass
-
+server = 'ws://127.0.0.1:8000/ws/row/?authorization=Bearer%20'
 async def main_async():
-    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo2LCJ1c2VybmFtZSI6Im15VGVzdGVybW90b3Jpc3RhMkBnbWFpbC5jb20iLCJleHAiOjE2Mzc2NzcxMjcsImVtYWlsIjoibXlUZXN0ZXJtb3RvcmlzdGEyQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM3NTA0MzI3fQ.4F61yBlVxrNudc4ZivKTCYn1Utc4LL1hg6OGBkogFqU'
-    token2 = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1LCJ1c2VybmFtZSI6Im15VGVzdGVybW90b3Jpc3RhMUBnbWFpbC5jb20iLCJleHAiOjE2Mzc2NzcxMjYsImVtYWlsIjoibXlUZXN0ZXJtb3RvcmlzdGExQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM3NTA0MzI2fQ.6xy95OmNVcVy1_bqi-rKroL0AASv1h0ISJBoSFCLolA'
+    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo2LCJ1c2VybmFtZSI6Im15VGVzdGVybW90b3Jpc3RhMkBnbWFpbC5jb20iLCJleHAiOjE2Mzg4NDAzNzQsImVtYWlsIjoibXlUZXN0ZXJtb3RvcmlzdGEyQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM4NjY3NTc0fQ.mYa4ahrXwDyNLjgCIgM3zVJmXBSRg6Zv1JT9GibvTx0'
+    token2 = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1LCJ1c2VybmFtZSI6Im15VGVzdGVybW90b3Jpc3RhMUBnbWFpbC5jb20iLCJleHAiOjE2Mzg4NDAzNzMsImVtYWlsIjoibXlUZXN0ZXJtb3RvcmlzdGExQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM4NjY3NTczfQ.8PAYI2eSZjlUJ1yhGKvd9KujCiL10ZwUK6wZojr7CWM'
 
-    await asyncio.gather(SET_LOCALE("ws://127.0.0.1:8000/ws/row/?authorization=Bearer%20"+token),SET_LOCALE("ws://127.0.0.1:8000/ws/row/?authorization=Bearer%20"+token2))
+    await asyncio.gather(SET_LOCALE(server+token),SET_LOCALE(server+token2))
         
 asyncio.run(main_async())

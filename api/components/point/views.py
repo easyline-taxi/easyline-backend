@@ -164,6 +164,7 @@ class PointRowAction(APIView):
         point = pontos_trabalhados.filter(point = request.user.point_id).first().point
         
         if point:
+            models.PointRow.objects.filter(point=point).first().consistency()
             fila = models.PointRow.objects.filter(point=point).values()
             
             for motorista in fila:

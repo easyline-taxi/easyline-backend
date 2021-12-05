@@ -74,9 +74,9 @@ def CHECK_IF_IN_POLYGON(user:models.User,params = None):
 
                 # historico do ponto
                 models.HistoricPoint.objects.create(point=point,action="EP",suject=user)
-                
-
-            return {"in_local": in_local,"distance": distance,"position_row":models.PointRow.objects.get(user=user).position}
+            row_user = models.PointRow.objects.filter(user=user).first()
+            
+            return {"in_local": in_local,"distance": distance,"position_row": row_user.position if row_user else None }
             
 
         else:
@@ -88,9 +88,8 @@ def CHECK_IF_IN_POLYGON(user:models.User,params = None):
                 models.HistoricUser.objects.create(user=user,action="ATT",suject=user,motive="Ficou Indisponível (Fora do Ponto)")
                 models.HistoricPoint.objects.create(point=point,action="SP",suject=user)
 
-                return {"in_local": in_local,"distance": distance,"position_row":models.PointRow.objects.get(user=user).position}
-
-        return {"in_local": in_local,"distance": distance,"position_row":None}
+            row_user = models.PointRow.objects.filter(user=user).first()
+            return {"in_local": in_local,"distance": distance,"position_row": row_user.position if row_user else None }
     else:
         print("Ponto não tem localidade")
         return {"in_local": in_local,"distance": None,"position_row":None,"warning": "Point no has local"}

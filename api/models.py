@@ -176,7 +176,20 @@ class PointRow(models.Model):
         else:
             return 1
     
+    def consistency(self):
+        """Reordena a fila corretamente
+        
+        """
+        res = PointRow.objects.filter(~Q(position=None),point = self.point).order_by("position")
+        for i,elem in enumerate(res):
+            if elem.position != (i+1):
+                elem.position = (i+1)
+                elem.save()
+
+        
+    
     def move_position(self, position:int):
+        
         if position >= 1 and position <= self.last_position() and self.position != position:
             if position > self.position:
                 others = PointRow.objects.filter(point = self.point, position__gte=position)
@@ -244,7 +257,7 @@ class Token(models.Model):
 
 from django.dispatch import receiver
 from asgiref.sync import async_to_sync
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save,post_delete
 from channels.layers import get_channel_layer
 channel_layer = get_channel_layer()
 
@@ -256,3 +269,12 @@ def save_alter_row_point(sender,instance,**kwargs):
             'point':instance.point.id,
             'event_type': "POINT_ROW_CHANGED"
             })
+
+@receiver(post_delete, sender=PointRow, dispatch_uid="save_del_row_point")
+def save_alter_row_point(sender,instance,**kwargs):
+    async_to_sync(channel_layer.send)('background-task', {
+            'type': 'send_event_to_point',
+            'point':instance.point.id,
+            'event_type': "POINT_ROW_CHANGED"
+            })
+    

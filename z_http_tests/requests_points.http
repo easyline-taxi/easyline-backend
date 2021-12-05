@@ -1,11 +1,12 @@
 
-@url =127.0.0.1:8000/api
+# @url =127.0.0.1:8000/api
+@url =easyline.ml/api
 @email = myTesteradmin1@gmail.com
 @pass = mytester123
 
 @deviceid = 71637336233
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0LCJ1c2VybmFtZSI6Im15VGVzdGVycHJhbmNoZXRlaXJvMUBnbWFpbC5jb20iLCJleHAiOjE2Mzc2NzcxMjUsImVtYWlsIjoibXlUZXN0ZXJwcmFuY2hldGVpcm8xQGdtYWlsLmNvbSIsIm9yaWdfaWF0IjoxNjM3NTA0MzI1fQ.dPXFz8Ef52Bj7s3k5fSifJ79NEQQyo-vn3U2DP485_A
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxMiwidXNlcm5hbWUiOiJteVRlc3RlcnByYW5jaGV0ZWlybzFAZ21haWwuY29tIiwiZXhwIjoxNjM4NzQ2NDE4LCJlbWFpbCI6Im15VGVzdGVycHJhbmNoZXRlaXJvMUBnbWFpbC5jb20iLCJvcmlnX2lhdCI6MTYzODU3MzYxOH0.zXTqnj2VLjc7i1glpthYKXeAuooqDkPz_qSMj9_CpF8
 
 
 ###
@@ -69,7 +70,7 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-	"user": 5,
+	"user": 13,
 	"position": 2
 }
 
