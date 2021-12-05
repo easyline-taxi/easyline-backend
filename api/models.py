@@ -167,15 +167,6 @@ class PointRow(models.Model):
     # online = models.BooleanField(default=False)
 
     # link_with_online = models.ForeignKey("consumer.Client",on_delete=models.CASCADE,default=None)
-
-
-    def last_position(self):
-        res = PointRow.objects.filter(~Q(position=None),point = self.point).order_by("-position")
-        if len(res)>=1:
-            return (res[0].position)+1
-        else:
-            return 1
-    
     def consistency(self):
         """Reordena a fila corretamente
         
@@ -186,8 +177,14 @@ class PointRow(models.Model):
                 elem.position = (i+1)
                 elem.save()
 
-        
-    
+    def last_position(self):
+        res = PointRow.objects.filter(~Q(position=None),point = self.point).order_by("-position")
+        self.consistency()
+        if len(res)>=1:
+            return (res[0].position)+1
+        else:
+            return 1
+
     def move_position(self, position:int):
         
         if position >= 1 and position <= self.last_position() and self.position != position:
@@ -205,6 +202,7 @@ class PointRow(models.Model):
                     other.save()
                 self.position = position
                 self.save()
+            self.consistency()
             return True
         if position == self.position:
             return True
