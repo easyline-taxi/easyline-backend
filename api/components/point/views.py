@@ -189,7 +189,7 @@ class PointRowAction(APIView):
 
             --
         """
-        
+        sendLogDiscord(request)
         # ! find points by device id
         device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
         pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device)
@@ -231,7 +231,7 @@ class PointRowAction(APIView):
 
             --
         """
-        
+        sendLogDiscord(request)
         device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
         pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device)
         point_trab = pontos_trabalhados.filter(point = request.user.point_id).first()

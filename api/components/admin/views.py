@@ -240,6 +240,7 @@ class HistoricPOintViewSet(APIView):
         --
 
         """
+        sendLogDiscord(request)
         serializer = serializers.PointOwnerActionSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
         user = models.User.objects.get(**serializer.data)
@@ -271,7 +272,7 @@ class ChangeUserFunctionViewSet(APIView):
 
             --
         """
-        
+        sendLogDiscord(request)
         # ? get actual point 
         point = models.Point.objects.get(pk=request.user.point_id)
         serializer = serializers.FunctionPointOwnerActionSerializer(data=request.data)
