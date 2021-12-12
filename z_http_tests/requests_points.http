@@ -6,7 +6,7 @@
 
 @deviceid = 71637336233
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxMiwidXNlcm5hbWUiOiJteVRlc3RlcnByYW5jaGV0ZWlybzFAZ21haWwuY29tIiwiZXhwIjoxNjM4NzQ2NDE4LCJlbWFpbCI6Im15VGVzdGVycHJhbmNoZXRlaXJvMUBnbWFpbC5jb20iLCJvcmlnX2lhdCI6MTYzODU3MzYxOH0.zXTqnj2VLjc7i1glpthYKXeAuooqDkPz_qSMj9_CpF8
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo5LCJ1c2VybmFtZSI6InByb3hpbW9AZ21haWwuY29tIiwiZXhwIjoxNjM5NDQ3NjY3LCJlbWFpbCI6InByb3hpbW9AZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzkyNzQ4Njd9.b2UxKx2dLQmuqSGZDRKnKrQhVQmXo26phHbPE6YxmZg
 
 
 ###
@@ -44,7 +44,7 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-	"point":20
+	"point":12
 }
 
 ###

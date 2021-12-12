@@ -1,11 +1,12 @@
 
-@url =127.0.0.1:8000/api
+# @url =127.0.0.1:8000/api
+@url =easyline.ml/api
 @email = admin@admin.com
 @pass = admin
 
 @deviceid = 00000000000
 
-@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo1NywidXNlcm5hbWUiOiJteVRlc3RlcmFkbWluMUBnbWFpbC5jb20iLCJleHAiOjE2Mzc0NDMxNzcsImVtYWlsIjoibXlUZXN0ZXJhZG1pbjFAZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzcyNzAzNzd9.Hn7iq7m-ql4LCnwGcuKjtET0LqKU6Y1qjlmLzUIoS38
+@token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo4LCJ1c2VybmFtZSI6Im5lcHR1bmV4NjNAZ21haWwuY29tIiwiZXhwIjoxNjM5MzY3MTM0LCJlbWFpbCI6Im5lcHR1bmV4NjNAZ21haWwuY29tIiwib3JpZ19pYXQiOjE2MzkxOTQzMzR9.uvVXFf5G0MtK9nf1dJNrtQuQLDigotBqox2p_-ADu04
 
 
 ###
