@@ -73,8 +73,9 @@ INSTALLED_APPS = [
     'channels',
     'drf_yasg',
     "django_filters",
-    'task.apps.TaskConfig',
-    'consumer.apps.ConsumerConfig'
+    'api_async',
+    "api_async.components.task.apps.TaskConfig",
+    "api_async.components.consumer.apps.ConsumerConfig"
 
 ]
 
