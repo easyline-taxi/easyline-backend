@@ -47,6 +47,4 @@ class Completed_Task(models.Model):
     execute_until = models.DateTimeField((""), default=None, null=True, blank=True)
     error = models.BooleanField(default=False)
     finalize_at = models.DateTimeField((""), default=timezone.now)
-    
-    def __str__(self):
-        return self.name+" - "+ str(self.uuid)
+

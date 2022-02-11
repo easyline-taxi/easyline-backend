@@ -1,8 +1,8 @@
 import requests
 from random import randint
 
-url_base = "http://127.0.0.1:8000/api"
-# url_base = "http://easyline.ml/api"
+# url_base = "http://127.0.0.1:8000/api"
+url_base = "http://easyline.ml/api"
 email_base = "myTester{}@gmail.com"
 name_base = "Nome examplo {}"
 password = "mytester123"
@@ -21,6 +21,15 @@ def generate_cpf():
         cpf.append(11 - val if val > 1 else 0)
 
     return '%s%s%s%s%s%s%s%s%s%s%s' % tuple(cpf)
+
+def request_print(res):
+    if res.status_code >= 300:
+        print(res.status_code, " - ",res.url)
+        print(res.content)
+    else:
+        print(res.status_code, " - ",res.url)
+        
+
 
 users = []
 admin1 = {
@@ -84,9 +93,11 @@ users.append(motorista2)
 
 for x in users:
     res = requests.post(url=url_base+'/auth/register/', json=x)
+    request_print(res)
     res = requests.post(url=url_base+'/auth/login/',json=x)
+    request_print(res)
     x['token'] = res.json().get('token')
-    
+
     
 
 ponto1 = {
@@ -106,6 +117,7 @@ ponto2 = {
 token = 'Bearer {}'.format(users[0].get('token'))
 headers={'Authorization': token }
 res = requests.post(url=url_base+'/point/register/', headers=headers, json=ponto1)
+request_print(res)
 ponto1['id'] = res.json().get('data').get('id')
 
 # Seleciona o ponto que quer trabalhar
@@ -113,12 +125,14 @@ point = {
     "point": ponto1['id']
 }
 res = requests.post(url=url_base+'/point/', headers=headers, json=point)
-
+request_print(res)
 
 
 # Adicionar os usuários
 res = requests.post(url=url_base+'/admin/actions/', headers=headers, json=prancheteiro1)
+request_print(res)
 res = requests.post(url=url_base+'/admin/actions/', headers=headers, json=motorista1)
+request_print(res)
 
 # Seta coordenadas
 
@@ -147,6 +161,7 @@ locale = {
   ]
 }
 res = requests.put(url=url_base+'/admin/config/', headers=headers, json=locale)
+request_print(res)
 
 
 # Troca usuário para cargo de prancheteiro
@@ -157,6 +172,7 @@ payload = {
 }
 
 res = requests.put(url=url_base+'/admin/transfer/',headers=headers, json = payload)
+request_print(res)
 
 
 # Coloca os usuários nos respectivos pontos
@@ -167,13 +183,16 @@ point = {
 }
 headers={'Authorization': 'Bearer '+prancheteiro1.get('token') }
 res = requests.post(url=url_base+'/point/', headers=headers, json=point)
+request_print(res)
 headers={'Authorization': 'Bearer '+motorista1.get('token') }
 res = requests.post(url=url_base+'/point/', headers=headers, json=point)
+request_print(res)
 
 
 token = 'Bearer {}'.format(users[1].get('token'))
 headers={'Authorization': token }
 res = requests.post(url=url_base+'/point/register/', headers=headers, json=ponto2)
+request_print(res)
 ponto2['id'] = res.json().get('data').get('id')
 
 # Seleciona o ponto que quer trabalhar
@@ -182,11 +201,15 @@ point = {
 }
 
 res = requests.post(url=url_base+'/point/', headers=headers, json=point)
+request_print(res)
 
 # Adiciona os usuários
 res = requests.post(url=url_base+'/admin/actions/', headers=headers, json=motorista1)
+request_print(res)
 res = requests.post(url=url_base+'/admin/actions/', headers=headers, json=motorista2)
+request_print(res)
 res = requests.post(url=url_base+'/admin/actions/', headers=headers, json=prancheteiro1)
+request_print(res)
 
 payload = {
     "function": "P",
@@ -194,6 +217,7 @@ payload = {
 }
 
 res = requests.put(url=url_base+'/admin/transfer/',headers=headers, json = payload)
+request_print(res)
 
 # Seta coordenadas
 
@@ -222,6 +246,7 @@ locale = {
   ]
 }
 res = requests.put(url=url_base+'/admin/config/', headers=headers, json=locale)
+request_print(res)
 
 # Coloca os usuários nos respectivos pontos
 # Seleciona o ponto que quer trabalhar
@@ -231,7 +256,10 @@ point = {
 }
 headers={'Authorization': 'Bearer '+prancheteiro1.get('token') }
 res = requests.post(url=url_base+'/point/', headers=headers, json=point)
+request_print(res)
 headers={'Authorization': 'Bearer '+motorista1.get('token') }
 res = requests.post(url=url_base+'/point/', headers=headers, json=point)
+request_print(res)
 headers={'Authorization': 'Bearer '+motorista2.get('token') }
 res = requests.post(url=url_base+'/point/', headers=headers, json=point)
+request_print(res)
