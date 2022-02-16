@@ -3,7 +3,7 @@ from api.tests_utils import utils
 import json
 
 class TestUserActions(TestCase):
-
+    
     def test_view_data_user(self):
         client = Client()
         

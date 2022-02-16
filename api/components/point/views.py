@@ -9,7 +9,7 @@ from django.contrib.gis.geos import GEOSGeometry, Point as ptr, Polygon, LinearR
 import traceback
 # ! Imports do APP
 from api import models
-from ..utils.utils import APIView, list_points, sendLogDiscord
+from ..utils import utils
 from api.components.user import serializers as user_serializer
 # TEsta dps
 # from django.contrib.auth.decorators import user_passes_test
@@ -23,7 +23,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class PointRegister(APIView):
+class PointRegister(utils.APIView):
     """
         Cria um ponto
 
@@ -35,7 +35,7 @@ class PointRegister(APIView):
     def post(self, request, format=None):
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
         # ? Criar um ponto vinculado ao usuário
         serializer = serializers.PointRegisterSerializer(data=request.data)
@@ -52,8 +52,10 @@ class PointRegister(APIView):
             models.HistoricUser.objects.create(
                 user=request.user, suject=request.user, motive="Criou o ponto", action="F")
             # ! find points by device id
-            devices = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')
-            models.PointEmployee.objects.create(deviceid=devices[0], point=point, function="A")
+            device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
+            if not device:
+                raise exceptions.NotAcceptable("Usuário (id: {}) não possui deviceId Registrado.".format(request.user.id))
+            models.PointEmployee.objects.create(deviceid=device, point=point, function="A")
 
             return Response({"message": _("Point Created"), "data": model_to_dict(point)})
         except Exception as ex:
@@ -62,7 +64,7 @@ class PointRegister(APIView):
             return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PointUserAction(APIView):
+class PointUserAction(utils.APIView):
     # TODO: Setup Tests
     # ? Ações user(comum)/point
 
@@ -81,14 +83,13 @@ class PointUserAction(APIView):
         """
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
         # ? Pega os pontos relacionado ao user
 
         # ! find points by device id
-        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
-        pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device)
-        data = {"points": list(map(list_points, pontos_trabalhados))}
+        pontos_trabalhados = utils.pontosTrabalhados(request.user)
+        data = {"points": list(map(utils.list_points, pontos_trabalhados))}
         logger.debug(data)
         serializer = serializers.PointListSerializer(data=data)
 
@@ -103,31 +104,27 @@ class PointUserAction(APIView):
         """
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
         # ? Escolher qual ponto será trabalhado e ativado pelo usuário
-        try:
-            devices = models.DeviceId.objects.filter(user=request.user).order_by('-last_used')
-            # ? Procura os pontos trabalhados
-            serializer = serializers.PointUserActionSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            ponto_selecionado = models.PointEmployee.objects.filter(deviceid=devices[0],
-                                                                    point__id=serializer.data.get('point')).first()
-            logger.info(ponto_selecionado)
-            if ponto_selecionado:
-                request.user.point_id = ponto_selecionado.point.id
-                request.user.save()
-                return Response({"message": "Point Selected " + str(request.user.point_id), "data": serializer.data})
-            return Response({"message": "Point does not exists " + str(request.data.get('id'))},
-                            status=status.HTTP_400_BAD_REQUEST)
-        except Exception as ex:
-            logger.error(ex)
-            return Response({"message": "Point does not exists " + str(request.data.get('id'))},
-                            status=status.HTTP_400_BAD_REQUEST)
-
+        
+        # ? Procura os pontos trabalhados
+        serializer = serializers.PointUserActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Pega o ponto selecionado e traz caso não ocorra uma exception
+        ponto_selecionado = utils.pontosTrabalhados(request.user,serializer.data.get('point',-1))
+        
+        if ponto_selecionado:
+            request.user.point_id = ponto_selecionado.point.id
+            request.user.save()
+            return Response({"message": "Point Selected " + str(request.user.point_id), "data": serializer.data})
+        return Response({"detail": "Point does not exists " + str(request.data.get('id')), "data": serializer.data},
+                        status=status.HTTP_400_BAD_REQUEST)
+    
 # TODO listar todos os usuário do ponto
 
-class PointRowAction(APIView):
+class PointRowAction(utils.APIView):
     """
         Ações relacionadas a manipulação da fila
     
@@ -154,33 +151,27 @@ class PointRowAction(APIView):
         """
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
         # ? Pega os pontos relacionado ao user
         
         # ! find points by device id
-        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
-        pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device)
-        point = pontos_trabalhados.filter(point = request.user.point_id).first().point
+        point = utils.pontosTrabalhados(request.user,point_id=request.user.point_id).point
         
-        if point:
-            fila = models.PointRow.objects.filter(point=point).values()
-            
-            for motorista in fila:
-                usuario = models.User.objects.get(id= motorista.get('user_id'))
-                status_moto = usuario.status
-                motorista['status']= status_moto
-                motorista['user'] = {
-                    "name": usuario.name,
-                    "vtr": usuario.vtr,
-                    "photo": usuario.photo,
-                }
-            
-            print(fila)
-
-            return Response({"message": "Fila Encontrada", "data": fila})
-        return Response({"message": "Point does not exists " + str(request.data.get('id'))},
-                                status=status.HTTP_400_BAD_REQUEST)
+        fila = models.PointRow.objects.filter(point=point).values()
+        
+        for motorista in fila:
+            usuario = models.User.objects.get(id= motorista.get('user_id'))
+            status_moto = usuario.status
+            motorista['status']= status_moto
+            motorista['user'] = {
+                "name": usuario.name,
+                "vtr": usuario.vtr,
+                "photo": usuario.photo,
+            }
+        
+        print(fila)
+        return Response({"message": "Fila Encontrada", "data": fila})
 
     def post(self, request, format=None):
         """
@@ -188,14 +179,11 @@ class PointRowAction(APIView):
 
             --
         """
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
         # ! find points by device id
-        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
-        pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device)
-        point_trab = pontos_trabalhados.filter(point = request.user.point_id).first()
-        if not point_trab:
-            return Response({"message": "Point não é trabalhado " + str(request.data.get('id'))},
-                                status=status.HTTP_400_BAD_REQUEST)
+        
+        point_trab = utils.pontosTrabalhados(request.user,request.user.point_id)
+
         # ! Permission
         if point_trab.function == 'M':
             raise exceptions.PermissionDenied("Não tem autoriazação")
@@ -230,13 +218,10 @@ class PointRowAction(APIView):
 
             --
         """
-        sendLogDiscord(request)
-        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
-        pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device)
-        point_trab = pontos_trabalhados.filter(point = request.user.point_id).first()
-        if not point_trab:
-            return Response({"message": "Point não é trabalhado " + str(request.user.point_id)},
-                                status=status.HTTP_400_BAD_REQUEST)
+        utils.sendLogDiscord(request)
+        
+        point_trab = utils.pontosTrabalhados(request.user, request.user.point_id)
+
         # ! Permission
         if point_trab.function == 'M':
             raise exceptions.PermissionDenied("Não tem autoriazação")

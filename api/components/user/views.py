@@ -9,7 +9,7 @@ from PIL import Image
 
 # ! Import From App
 from api import models
-from ..utils.utils import APIView,list_points,sendLogDiscord
+from ..utils import utils
 
 import re
 
@@ -44,7 +44,7 @@ def normalize_base64(photo_b64:str):
     b64image = b64_header[0]+b64
     return b64image
 
-class UserDataView(APIView):
+class UserDataView(utils.APIView):
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == "PUT":
@@ -58,7 +58,7 @@ class UserDataView(APIView):
         """
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
         #  ?: Retorna os dados do usuário
 
@@ -68,15 +68,11 @@ class UserDataView(APIView):
         #     # ! se não tiver device id registrado neste user REGISTRAR OUTRO DEVICE ID NELE
         #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)  
         
-        device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
-
-        # ? Procura os pontos trabalhados
-        pontos_trabalhados = models.PointEmployee.objects.filter(deviceid=device,deviceid__user=request.user)
-        
+        pontos_trabalhados = utils.pontosTrabalhados(request.user)
         
         data = {
             "user": request.user.__dict__,
-            "points": list(map(list_points,pontos_trabalhados))
+            "points": list(map(utils.list_points,pontos_trabalhados))
         }
         serializer = serializers.UserDataPoints(data=data)
         serializer.is_valid(raise_exception=True)
@@ -103,17 +99,20 @@ class UserDataView(APIView):
         #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
-
+        utils.sendLogDiscord(request)
+        
+        #  Se tiver em algum ponto, então verificar a validade do usuário nele
+        if request.user.point_id:
+            utils.pontosTrabalhados(request.user)
 
         if request.data.get('photo'):
             request.data['photo'] = normalize_base64(request.data.get('photo'))
         # ? Aloca os campos necessários de acordo com o modelo 
         serializer = serializers.UserSerializer(request.user,data =request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         try:
             # ? Verifica a validade dos campos
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
             if serializer.data.get('status',None) != 'DIS' and serializer.data.get('status',None) != None and request.user.point_id:
                 user_row = models.PointRow.objects.filter(user=request.user, point__id=request.user.point_id).first()
                 if user_row:
@@ -125,7 +124,6 @@ class UserDataView(APIView):
                         user=request.user, suject=request.user, motive="Saiu da Fila", action="REM")
             # ? TODO: ADicionar no HIstorico do Usuário essas ALTERÇÔES
             models.HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
-
             return Response({"message":"Update Sucessful" , "data":serializer.data})
         except Exception as ex:
             logger.error(ex)
@@ -143,11 +141,8 @@ class UserDataView(APIView):
         # ! Verificar a validade disso, pois acho que a conta não poderá ser excluida
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
-            
-        try:
-            request.user.delete()
-            return Response({"message":"Deleted Sucessful"})
-        except Exception as ex:
-            logger.error(ex)
-            return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+        utils.sendLogDiscord(request)
+        
+        request.user.delete()
+        return Response({"message":"Deleted Sucessful"})
+

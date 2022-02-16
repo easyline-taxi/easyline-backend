@@ -178,10 +178,10 @@ class PointRow(models.Model):
                 elem.save()
 
     def last_position(self):
-        res = PointRow.objects.filter(~Q(position=None),point = self.point).order_by("-position")
+        res = PointRow.objects.filter(~Q(position=None),point = self.point).order_by("-position").first()
         self.consistency()
-        if len(res)>=1:
-            return (res[0].position)+1
+        if res:
+            return (res.position)+1
         else:
             return 1
 

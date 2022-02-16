@@ -1,7 +1,10 @@
 import asyncio
 from websockets import connect
 import json
-from time import sleep
+import requests
+import configs
+url_base = configs.url_base.replace('http', 'ws').replace('/api','')
+
 async def GET_ROW(uri):
     async with connect(uri) as websocket:
         
@@ -34,11 +37,16 @@ async def SET_LOCALE(uri):
                 print(response)
             except asyncio.TimeoutError:
                 pass
-server = 'ws://easyline.ml:8000/ws/row/?authorization=Bearer%20'
+server = url_base+'/ws/row/?authorization=Bearer%20'
+
+res = requests.post(url=configs.url_base+'/auth/login/',json=configs.motorista1)
+token1 = res.json().get('token')
+res = requests.post(url=configs.url_base+'/auth/login/',json=configs.motorista2)
+token2 = res.json().get('token')
 
 async def main_async():
-    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxNCwidXNlcm5hbWUiOiJteVRlc3Rlcm1vdG9yaXN0YTJAZ21haWwuY29tIiwiZXhwIjoxNjM4ODQwMzcyLCJlbWFpbCI6Im15VGVzdGVybW90b3Jpc3RhMkBnbWFpbC5jb20iLCJvcmlnX2lhdCI6MTYzODY2NzU3Mn0.JbYyNb_mFy4zDy1Xvg9f1okdplWg5047L_hH_fhOALk'
-    token2 = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxMywidXNlcm5hbWUiOiJteVRlc3Rlcm1vdG9yaXN0YTFAZ21haWwuY29tIiwiZXhwIjoxNjM4ODQwMzcxLCJlbWFpbCI6Im15VGVzdGVybW90b3Jpc3RhMUBnbWFpbC5jb20iLCJvcmlnX2lhdCI6MTYzODY2NzU3MX0.ChEVztLuQnKKHCt4iI4BD5Fe3cKt5Naa2GTh14Jwi-Y'
-    await asyncio.gather(SET_LOCALE(server+token),SET_LOCALE(server+token2))
+    global token1
+    global token2
+    await asyncio.gather(SET_LOCALE(server+token1),SET_LOCALE(server+token2))
         
 asyncio.run(main_async())
