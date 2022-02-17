@@ -115,7 +115,7 @@ class UserDataView(utils.APIView):
         serializer = serializers.UserSerializer(request.user,data =request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        if serializer.data.get("status", None) != request.user.status:
+        if serializer.data.get("status", None) != models.User.objects.get(id=request.user.id).status:
             return Response({"message":"Update Failed" , "data":serializer.data},status=status.HTTP_400_BAD_REQUEST)
         # ? Verifica a validade dos campos
         if serializer.data.get('status',None) != 'DIS' and request.user.point_id:
