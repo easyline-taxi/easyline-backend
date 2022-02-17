@@ -115,6 +115,8 @@ class UserDataView(utils.APIView):
         serializer = serializers.UserSerializer(request.user,data =request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        if serializer.data.get("status", None) != request.user.status:
+            return Response({"message":"Update Failed" , "data":serializer.data},status=status.HTTP_400_BAD_REQUEST)
         # ? Verifica a validade dos campos
         if serializer.data.get('status',None) != 'DIS' and request.user.point_id:
             user_row = models.PointRow.objects.filter(user=request.user, point__id=request.user.point_id).first()
@@ -126,8 +128,6 @@ class UserDataView(utils.APIView):
                 models.HistoricUser.objects.create(
                     user=request.user, suject=request.user, motive="Saiu da Fila", action="REM")
         # ? TODO: ADicionar no HIstorico do Usuário essas ALTERÇÔES
-        if serializer.data.get("status", None) != request.user.status:
-            return Response({"message":"Update Failed" , "data":serializer.data},status=status.HTTP_400_BAD_REQUEST)
         models.HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
         return Response({"message":"Update Sucessful" , "data":serializer.data})
         
