@@ -47,6 +47,7 @@ def normalize_base64(photo_b64:str):
     b64image = b64_header[0]+b64
     return b64image
 
+<<<<<<< HEAD
 
 class UserDataViewset(mixins.UpdateModelMixin,
                       mixins.ListModelMixin,
@@ -78,6 +79,8 @@ class UserDataViewset(mixins.UpdateModelMixin,
 
     def destroy(self, request,*args, **kwargs):
         return super().destroy(request, *args, **kwargs)
+=======
+>>>>>>> master
 class UserDataView(utils.APIView):
 
     def get_serializer_class(self, *args, **kwargs):
