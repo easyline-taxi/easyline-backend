@@ -126,6 +126,8 @@ class UserDataView(utils.APIView):
                 models.HistoricUser.objects.create(
                     user=request.user, suject=request.user, motive="Saiu da Fila", action="REM")
         # ? TODO: ADicionar no HIstorico do Usuário essas ALTERÇÔES
+        if serializer.data.get("status", None) != request.user.status:
+            return Response({"message":"Update Failed" , "data":serializer.data},status=status.HTTP_400_BAD_REQUEST)
         models.HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
         return Response({"message":"Update Sucessful" , "data":serializer.data})
         
