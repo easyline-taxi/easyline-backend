@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from . import serializers
 import base64
 import io
+from rest_framework.decorators import action
 from PIL import Image
 
 # ! Import From App
@@ -15,6 +16,8 @@ import re
 
 import logging
 logger = logging.getLogger(__name__)
+
+from rest_framework import mixins,generics
 
 
 def normalize_base64(photo_b64:str):
@@ -44,6 +47,37 @@ def normalize_base64(photo_b64:str):
     b64image = b64_header[0]+b64
     return b64image
 
+
+class UserDataViewset(mixins.UpdateModelMixin,
+                      mixins.ListModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
+    serializer_class = serializers.UserSerializer
+    
+  
+    def get_serializer_class(self, *args, **kwargs):
+        if self.action == "update" or self.action == "partial_update":
+            return serializers.UserSerializer
+        else:
+            return serializers.UserDataPoints
+    def get_queryset(self):
+        return [self.request.user]
+    
+    def get_permissions(self):
+        print(self.request.method)
+        return super().get_permissions()
+    
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+    
+    def update(self, request,*args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request,*args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 class UserDataView(utils.APIView):
 
     def get_serializer_class(self, *args, **kwargs):
