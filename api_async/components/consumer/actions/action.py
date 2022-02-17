@@ -41,6 +41,7 @@ def CHECK_IF_IN_POLYGON(user:models.User,params = None):
     in_local=False
     
     point = models.Point.objects.get(pk = user.point_id)
+    user = models.User.objects.get(pk = user.id)
     if point.local:
         # pega o=poligono
         area = Polygon(point.convert_local_in_points())
