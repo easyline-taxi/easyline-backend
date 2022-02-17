@@ -115,24 +115,20 @@ class UserDataView(utils.APIView):
         serializer = serializers.UserSerializer(request.user,data =request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        try:
-            # ? Verifica a validade dos campos
-            if serializer.data.get('status',None) != 'DIS' and serializer.data.get('status',None) != None and request.user.point_id:
-                user_row = models.PointRow.objects.filter(user=request.user, point__id=request.user.point_id).first()
-                if user_row:
-                    user_row.move_position(user_row.last_position())
-                    user_row.delete()
-                    models.HistoricPoint.objects.create(
-                        point=user_row.point, suject=request.user, motive="Saiu da Fila", action="REM")
-                    models.HistoricUser.objects.create(
-                        user=request.user, suject=request.user, motive="Saiu da Fila", action="REM")
-            # ? TODO: ADicionar no HIstorico do Usuário essas ALTERÇÔES
-            models.HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
-            return Response({"message":"Update Sucessful" , "data":serializer.data})
-        except Exception as ex:
-            logger.error(ex)
-            # ? Senão retorna erro 404
-            return Response({"message": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+        # ? Verifica a validade dos campos
+        if serializer.data.get('status',None) != 'DIS' and request.user.point_id:
+            user_row = models.PointRow.objects.filter(user=request.user, point__id=request.user.point_id).first()
+            if user_row:
+                user_row.move_position(user_row.last_position())
+                user_row.delete()
+                models.HistoricPoint.objects.create(
+                    point=user_row.point, suject=request.user, motive="Saiu da Fila", action="REM")
+                models.HistoricUser.objects.create(
+                    user=request.user, suject=request.user, motive="Saiu da Fila", action="REM")
+        # ? TODO: ADicionar no HIstorico do Usuário essas ALTERÇÔES
+        models.HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
+        return Response({"message":"Update Sucessful" , "data":serializer.data})
+        
 
     def delete(self,request,format=None):
         """
