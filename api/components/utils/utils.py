@@ -55,6 +55,7 @@ def sendLogDiscord(request):
         'type': 'send_message_discord', 
         'user': request.user.email,
         'action': request.method,
+        'body':request.data,
         'from':request.META.get('REMOTE_ADDR'),
         'url': request.get_full_path()
         })

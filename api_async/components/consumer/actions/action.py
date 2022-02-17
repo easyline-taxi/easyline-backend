@@ -109,7 +109,7 @@ def SET_LOCALE(user,params):
     # coordinate = ast.literal_eval(params.get("coordinate"))
     serializer = serializers.PointCoordinateSerializer(data=params.get("coordinate"))
     serializer.is_valid(raise_exception=True)
-
+    user = models.User.objects.get(id=user.id)
     user.last_position = serializer.data
     user.last_position_time = timezone.now()
     user.save()

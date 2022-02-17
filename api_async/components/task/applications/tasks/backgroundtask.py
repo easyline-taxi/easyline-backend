@@ -57,7 +57,7 @@ class BackgroundTaskConsumer(BaseTaskManager):
             send={
                 "type": message.get('action', None),
                 "title": message.get('user', None),
-                "description": "{}\n{}".format(message.get('url', None),message.get('from', None)),
+                "description": json.dumps(message),
                 "color": message.get('color', "#f3faff"),
 
             }
