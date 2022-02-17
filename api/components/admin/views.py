@@ -14,14 +14,14 @@ import json
 
 # ! Imports do APP
 from api import models
-from ..utils.utils import APIView,list_points,sendLogDiscord
+from ..utils import utils
 
 
 import logging
 logger = logging.getLogger(__name__)
 
-# TODO COMO TRANSFORMAR UM USUÀRIO EM PRANCHETEIRO?
-class PointOwnerAction(APIView):
+# ok TODO COMO TRANSFORMAR UM USUÀRIO EM PRANCHETEIRO?
+class PointOwnerAction(utils.APIView):
 
     permission_classes = [permissions.IsOwner]
 
@@ -44,12 +44,12 @@ class PointOwnerAction(APIView):
 
         """
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
-        point = models.Point.objects.get(pk=request.user.point_id)
+        utils.sendLogDiscord(request)
+        point = utils.pontosTrabalhados(request.user, request.user.point_id).point
 
         device = models.DeviceId.objects.filter(user=request.user).order_by('-last_used').first()
         p = models.PointEmployee.objects.filter(
-            deviceid=device, function="A", point__id = point.id).first()
+            deviceid=device, function="A", point=point).first()
 
         if p:
             serializer = serializers.PointGetOwnerSerializer(instance=point)
@@ -64,9 +64,9 @@ class PointOwnerAction(APIView):
 
         """
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
-        point = models.Point.objects.get(pk=request.user.point_id)
+        point = utils.pontosTrabalhados(request.user, request.user.point_id).point
         
         # ? Verifica se o polygono existe
         if not request.data.get('coordinates'):
@@ -86,7 +86,7 @@ class PointOwnerAction(APIView):
             logger.info(serializer.data.get("coordinates"))
             coords = map(lambda x: (x.get('latitude',None),x.get('longitude',None)), serializer.data.get("coordinates"))
             try:
-                polygon= Polygon(tuple(coords))
+                _= Polygon(tuple(coords))
             except Exception as ex:
                 logger.error(ex)
                 return Response({"message": "Polígono mal formado."},status=status.HTTP_400_BAD_REQUEST)
@@ -105,10 +105,10 @@ class PointOwnerAction(APIView):
         """
     
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
         # ?  Deletar o ponto
-        point = models.Point.objects.get(pk=request.user.point_id)
+        point = utils.pontosTrabalhados(request.user, request.user.point_id).point
 
         if point == None:
             return Response({"message": "Point is invalid " + str(request.data.get('point'))}, status=status.HTTP_400_BAD_REQUEST)
@@ -124,7 +124,7 @@ class PointOwnerAction(APIView):
 
     
 
-class PointOwnerUserAction(APIView):
+class PointOwnerUserAction(utils.APIView):
     # TODO: Setup Tests
 
     serializer_class = serializers.PointOwnerActionSerializer
@@ -148,12 +148,12 @@ class PointOwnerUserAction(APIView):
         """
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
         # ? TODO: Adicionar usuários do ponto
 
         #  ? checa se o usuário TEM PERMISSAO para adicionar no point
-        point = models.Point.objects.get(pk = request.user.point_id)
+        point = utils.pontosTrabalhados(request.user, request.user.point_id).point
         
         # TODO: ADicionar as limitações do ponto com base nos planos
 
@@ -191,7 +191,7 @@ class PointOwnerUserAction(APIView):
         """
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
         # TODO: Setup Tests
 
@@ -202,17 +202,15 @@ class PointOwnerUserAction(APIView):
             serializer.data['motive'] = "Removeu o usuário usuário"
 
         # ? TODO Verficiar o usuário tem permissão
-        point = models.Point.objects.get(pk = request.user.point_id)
+        point = utils.pontosTrabalhados(request.user, request.user.point_id).point
         
         # ! manda o email do cara
         device = models.DeviceId.objects.filter(deviceid=serializer.data.get("suject").get('deviceid'),user__email=serializer.data.get("suject").get('email')).first()
-        
         if not device:
-            raise exceptions.NotFound("Usuário não encontrado") 
-        # ? TODO Verficiar se o usuário está no ponto
+            raise exceptions.NotFound("Usuário não encontrado com o deviceId: {} e email: {}".format(serializer.data.get("suject").get('deviceid'),serializer.data.get("suject").get('email')))
         
-        if not len(models.PointEmployee.objects.filter(point=point,deviceid=device)):
-            return Response({"message": "Usuário não pertence a este ponto"},status=status.HTTP_400_BAD_REQUEST)
+        # ? TODO Verficiar se o usuário está no ponto (da exception)
+        _ = utils.pontosTrabalhados(device.user, point.id)
         
         # ? TODO Remover o usuário
         employee = models.PointEmployee.objects.filter(point=point,deviceid=device).first()
@@ -226,7 +224,7 @@ class PointOwnerUserAction(APIView):
 
 
 
-class HistoricPOintViewSet(APIView):
+class HistoricPOintViewSet(utils.APIView):
     # TODO: Setup Tests
 
     serializer_class = serializers.PointOwnerActionSerializer
@@ -240,7 +238,7 @@ class HistoricPOintViewSet(APIView):
         --
 
         """
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
         serializer = serializers.PointOwnerActionSerializer(data = request.data)
         serializer.is_valid(raise_exception=True)
         user = models.User.objects.get(**serializer.data)
@@ -254,7 +252,7 @@ class HistoricPOintViewSet(APIView):
         serializer_historic.is_valid(raise_exception=True)
         return Response({"message": "Historico Encontrado", "data":serializer_historic.data })
 
-class ChangeUserFunctionViewSet(APIView):
+class ChangeUserFunctionViewSet(utils.APIView):
     # TODO: Setup Tests
 
     serializer_class = serializers.FunctionPointOwnerActionSerializer
@@ -272,9 +270,9 @@ class ChangeUserFunctionViewSet(APIView):
 
             --
         """
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
         # ? get actual point 
-        point = models.Point.objects.get(pk=request.user.point_id)
+        point = utils.pontosTrabalhados(request.user, request.user.point_id).point
         serializer = serializers.FunctionPointOwnerActionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = models.User.objects.get(email=request.data.get('email'))
@@ -301,11 +299,11 @@ class ChangeUserFunctionViewSet(APIView):
         # TODO: TESTAR
 
         # ENVIO DE LOG DO BOT DISCORD
-        sendLogDiscord(request)
+        utils.sendLogDiscord(request)
 
 
         # ? get actual point 
-        point = models.Point.objects.get(pk=request.user.point_id)
+        point = utils.pontosTrabalhados(request.user, request.user.point_id).point
 
         serializer = serializers.PointOwnerActionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -11,32 +11,27 @@ import os
 
 from django.core.asgi import get_asgi_application
 import django
+from django.conf import settings
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'easyline.settings')
 django.setup()
 
-
 # 
 from channels.routing import ProtocolTypeRouter, URLRouter, ChannelNameRouter
-from django.conf.urls import url
-from task.routing import channels_urlspattern
 
-# # 
+from api_async import routing
+from api_async.middlewares.AuthMiddleware import TokenAuthMiddleware
 
-from consumer.middlewares.AuthMiddleware import TokenAuthMiddleware
-from consumer.routing import urlpatterns
-
-
-# application = get_asgi_application()
+application = get_asgi_application()
 
 application = ProtocolTypeRouter({
     # "http": get_asgi_application(),
      "channel": ChannelNameRouter(
-        channels_urlspattern
+        routing.channels_urlspattern
     ),
     "websocket": TokenAuthMiddleware(
         URLRouter(
-            urlpatterns
+            routing.urlpatterns
         )
     )
 })
