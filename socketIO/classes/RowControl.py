@@ -29,7 +29,7 @@ class RowControl(socketio.Namespace):
             raise ConnectionRefusedError("Token Expirado!")
         else:
             print("Err: Sem token")
-            models.HistoricWebsocket.objects.create(sid=sid,point=res.user.point_id,action="failed connect - sem token válido")
+            models.HistoricWebsocket.objects.create(sid=sidaction="failed connect - sem token válido")
             raise ConnectionRefusedError("Não Autenticado!")
         
         
