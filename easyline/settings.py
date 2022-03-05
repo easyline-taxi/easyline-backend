@@ -75,7 +75,8 @@ INSTALLED_APPS = [
     "django_filters",
     'api_async',
     "api_async.components.task.apps.TaskConfig",
-    "api_async.components.consumer.apps.ConsumerConfig"
+    "api_async.components.consumer.apps.ConsumerConfig",
+    "socketIO"
 
 ]
 
@@ -174,12 +175,28 @@ DATABASES = {
         'NAME': config.get('DATABASENAME'),
         'CLIENT': {
             'host': config.get('HOST'),
+            # 'authMechanism': 'SCRAM-SHA-1',
             # 'port': int(config.get('PORT')),
             # 'username': config.get('USERDB'),
             # 'password': config.get('PASSDB')
         },
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': config.get('DATABASENAME'),
+
+#         'USER': config.get('USERDB'),
+
+#         'PASSWORD':  config.get('PASSDB'),
+
+#         'HOST': config.get('HOSTDB'),
+
+#         'PORT': config.get('PORTDB')
+#     }
+# }
 
 CHANNEL_LAYERS = {
     "default": {

@@ -1,4 +1,0 @@
-DATABASENAME="easyline"
-HOST="mongodb"
-REDIS_HOST="db_regis"
-REDIS_PORT=6379

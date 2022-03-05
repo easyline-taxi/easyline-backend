@@ -8,6 +8,7 @@ RUN mkdir -p ./app
 WORKDIR /app
 RUN mkdir -p /pip_cache
 COPY . .
+COPY .env_easyline .env
 RUN pip install -r requirements.txt --cache-dir /pip_cache
 
 RUN chmod +x /app/start-server.sh

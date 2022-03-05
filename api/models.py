@@ -171,6 +171,7 @@ class PointRow(models.Model):
         """Reordena a fila corretamente
         
         """
+        PointRow.objects.filter(~Q(user__status="DIS"),~Q(position=None),point = self.point).delete()
         res = PointRow.objects.filter(~Q(position=None),point = self.point).order_by("position")
         for i,elem in enumerate(res):
             if elem.position != (i+1):
