@@ -31,8 +31,7 @@ def disconnect():
     
 
 if __name__ == '__main__':
-    token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0MCwidXNlcm5hbWUiOiJ3ZXNsZXliZW5pY2lvNEBnbWFpbC5jb20iLCJleHAiOjE2NDY2Njc4NzYsImVtYWlsIjoid2VzbGV5YmVuaWNpbzRAZ21haWwuY29tIiwib3JpZ19pYXQiOjE2NDY0OTUwNzZ9.trKJzdrPXFnt-YgvTa_39BF-bSawLyRMol6yXfNeBUA"
-    sio.connect('https://websocket.easyline.ml/', namespaces=['/row'], auth=token)
+    token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo4LCJ1c2VybmFtZSI6Im5lcHR1bmV4NjNAZ21haWwuY29tIiwiZXhwIjoxNjQ3NDQ4Njc1LCJlbWFpbCI6Im5lcHR1bmV4NjNAZ21haWwuY29tIiwib3JpZ19pYXQiOjE2NDcyNzU4NzV9.JHrnOoyQYnUqsmJfc5TRrtdhBKp90XLBm-NzCxAZoMQ"
+    sio.connect('http://177.153.58.141:8888', namespaces=['/row'], auth=token)
     sio.emit("set_location",{"coordinate":{"latitude": 0,"longitude": 0}}, namespace="/row")
     sio.wait()
-    sio.disconnect()
