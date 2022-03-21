@@ -21,6 +21,8 @@ from api.components.user import serializers as user_serializer
 
 import logging
 
+from socketIO import send_notify
+
 logger = logging.getLogger(__name__)
 
 class PointRegister(utils.APIView):
@@ -34,8 +36,6 @@ class PointRegister(utils.APIView):
 
     def post(self, request, format=None):
 
-        # ENVIO DE LOG DO BOT DISCORD
-        utils.sendLogDiscord(request)
 
         # ? Criar um ponto vinculado ao usuário
         serializer = serializers.PointRegisterSerializer(data=request.data)
@@ -82,8 +82,6 @@ class PointUserAction(utils.APIView):
             --
         """
 
-        # ENVIO DE LOG DO BOT DISCORD
-        utils.sendLogDiscord(request)
 
         # ? Pega os pontos relacionado ao user
 
@@ -102,10 +100,6 @@ class PointUserAction(utils.APIView):
 
             --
         """
-
-        # ENVIO DE LOG DO BOT DISCORD
-        utils.sendLogDiscord(request)
-
         # ? Escolher qual ponto será trabalhado e ativado pelo usuário
         
         # ? Procura os pontos trabalhados
@@ -122,8 +116,6 @@ class PointUserAction(utils.APIView):
         return Response({"detail": "Point does not exists " + str(request.data.get('id')), "data": serializer.data},
                         status=status.HTTP_400_BAD_REQUEST)
     
-# TODO listar todos os usuário do ponto
-
 class PointRowAction(utils.APIView):
     """
         Ações relacionadas a manipulação da fila
@@ -149,9 +141,6 @@ class PointRowAction(utils.APIView):
 
             --
         """
-
-        # ENVIO DE LOG DO BOT DISCORD
-        utils.sendLogDiscord(request)
 
         # ? Pega os pontos relacionado ao user
         
@@ -179,8 +168,7 @@ class PointRowAction(utils.APIView):
 
             --
         """
-        utils.sendLogDiscord(request)
-        # ! find points by device id
+
         
         point_trab = utils.pontosTrabalhados(request.user,request.user.point_id)
 
@@ -198,6 +186,9 @@ class PointRowAction(utils.APIView):
             user.status = "TRI"
             user.save()
             objeto_fila.delete()
+            
+            # envia notificação de alteração da fila
+            send_notify.send_row(request.user)
             
             models.HistoricPoint.objects.create(
                 point=point, suject=user, motive="Tripulado", action="TRI")
@@ -218,7 +209,6 @@ class PointRowAction(utils.APIView):
 
             --
         """
-        utils.sendLogDiscord(request)
         
         point_trab = utils.pontosTrabalhados(request.user, request.user.point_id)
 
@@ -240,6 +230,9 @@ class PointRowAction(utils.APIView):
             else:
                 aux_action = 'MB'
                 aux_motive = 'Movido para Baixo'
+                
+            # envia notificação de alteração da fila
+            send_notify.send_row(request.user)
                 
            
             

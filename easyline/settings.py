@@ -56,6 +56,7 @@ if os.name == 'nt':
         VIRTUAL_ENV_BASE, r"Lib\site-packages\osgeo\data\gdal")
     GDAL_LIBRARY_PATH = os.path.join(
         VIRTUAL_ENV_BASE, r'Lib\site-packages\osgeo\gdal302.dll')
+        
 
 # GEOS_LIBRARY_PATH = r'C:\OSGeo4W\bin\geos_c.dll'
 # Application definition
@@ -110,6 +111,11 @@ SWAGGER_SETTINGS = {
     'DISPLAY_OPERATION_ID': True,
     'DOC_EXPANSION': 'none',
     'SHOW_REQUEST_HEADERS': True
+}
+
+SOCKET_IO_SETTINGS = {
+    "url": str(config.get('SERVER_WEBSOCKET', '127.0.0.1')),
+    "port": int(config.get('PORT_WEBSOCKET', 8888))
 }
 
 # Rest Framwork

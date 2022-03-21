@@ -11,6 +11,7 @@ class PointRowAdmin(admin.ModelAdmin):
 @admin.register(models.User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ['id','email','last_login','point_id']
+    exclude = ('last_position',)
     
 @admin.register(models.PointEmployee)
 class PointEmployeeAdmin(admin.ModelAdmin):

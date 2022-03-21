@@ -41,7 +41,7 @@ class User(AbstractUser,models.Model):
     name = models.CharField(max_length=300, blank=True)
     city = models.CharField(max_length=100, blank= True, null=True)
     country = models.CharField(max_length=100, blank= True, null=True)
-    photo = models.TextField(null=True)
+    photo = models.TextField(null=True,blank=True)
     active = models.BooleanField( default=True)
 
     last_position = models.JSONField(default={})
@@ -263,17 +263,9 @@ channel_layer = get_channel_layer()
 # SIGNALS DJANGO
 @receiver(post_save, sender=PointRow, dispatch_uid="save_alter_row_point")
 def save_alter_row_point(sender,instance,**kwargs):
-    async_to_sync(channel_layer.send)('background-task', {
-            'type': 'send_event_to_point',
-            'point':instance.point.id,
-            'event_type': "POINT_ROW_CHANGED"
-            })
+    print(instance)
 
 @receiver(post_delete, sender=PointRow, dispatch_uid="save_del_row_point")
 def save_alter_row_point(sender,instance,**kwargs):
-    async_to_sync(channel_layer.send)('background-task', {
-            'type': 'send_event_to_point',
-            'point':instance.point.id,
-            'event_type': "POINT_ROW_CHANGED"
-            })
+    print(instance)
     

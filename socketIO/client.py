@@ -1,9 +1,14 @@
 import socketio
+import time
 sio = socketio.Client()
 
 @sio.event
 def connect():
     print('connection established')
+
+@sio.on('connect', namespace='/row')
+def connect():
+    print('connection established namespace')
 
 
 @sio.on('my_message',namespace='/row')
@@ -29,9 +34,21 @@ def disconnect():
     print('disconnected from server')
 
     
+url = "http://127.0.0.1:8888"
+token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6Indlc2xleWJlbmljaW80QGdtYWlsLmNvbSIsImV4cCI6MTY0NzkxMjYzMCwiZW1haWwiOiJ3ZXNsZXliZW5pY2lvNEBnbWFpbC5jb20iLCJvcmlnX2lhdCI6MTY0NzczOTgzMH0.BEIaAlmAuGv6mg7eTaRK5RUH07NJR-z7kAOlIEFToQk"
 
 if __name__ == '__main__':
-    token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo4LCJ1c2VybmFtZSI6Im5lcHR1bmV4NjNAZ21haWwuY29tIiwiZXhwIjoxNjQ3NDQ4Njc1LCJlbWFpbCI6Im5lcHR1bmV4NjNAZ21haWwuY29tIiwib3JpZ19pYXQiOjE2NDcyNzU4NzV9.JHrnOoyQYnUqsmJfc5TRrtdhBKp90XLBm-NzCxAZoMQ"
-    sio.connect('http://177.153.58.141:8888', namespaces=['/row'], auth=token)
-    sio.emit("set_location",{"coordinate":{"latitude": 0,"longitude": 0}}, namespace="/row")
+    sio.connect(url,namespaces=['/row'], auth=token)
+    while True:
+        try:
+            sio.emit("set_location",{"coordinate":{"latitude": 0,"longitude": 0}}, namespace="/row")
+            # sio.emit("send_notify",{"coordinate":{"latitude": 0,"longitude": 0}}, namespace="/row")
+            time.sleep(5)
+        except Exception:
+            print("reconnectando")
+            try:
+                sio.connect(url, namespaces=['/row'],auth=token)
+            except:
+                print("Falhou")
+                pass
     sio.wait()

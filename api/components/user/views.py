@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 from rest_framework import mixins,generics
 
+from socketIO import send_notify
 
 def normalize_base64(photo_b64:str):
     if not photo_b64:
@@ -103,7 +104,7 @@ class UserDataView(utils.APIView):
         #     return Response({"message": "DeviceId Invalid"}, status=status.HTTP_401_UNAUTHORIZED)
 
         # ENVIO DE LOG DO BOT DISCORD
-        utils.sendLogDiscord(request)
+        # utils.sendLogDiscord(request)
         
         #  Se tiver em algum ponto, então verificar a validade do usuário nele
         if request.user.point_id:
@@ -121,12 +122,13 @@ class UserDataView(utils.APIView):
         if serializer.data.get('status',None) != 'DIS' and request.user.point_id:
             user_row = models.PointRow.objects.filter(user=request.user, point__id=request.user.point_id).first()
             if user_row:
-                user_row.move_position(user_row.last_position())
+                user_row.move_position(user_row.last_position()-1)
                 user_row.delete()
                 models.HistoricPoint.objects.create(
                     point=user_row.point, suject=request.user, motive="Saiu da Fila", action="REM")
                 models.HistoricUser.objects.create(
                     user=request.user, suject=request.user, motive="Saiu da Fila", action="REM")
+                send_notify.send_row(request.user)
         # ? TODO: ADicionar no HIstorico do Usuário essas ALTERÇÔES
         models.HistoricUser.objects.create(user=request.user, suject=request.user,action="ATT",motive="atualização")
         return Response({"message":"Update Sucessful" , "data":serializer.data})
