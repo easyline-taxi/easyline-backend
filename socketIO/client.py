@@ -35,7 +35,7 @@ def disconnect():
 
     
 url = "http://127.0.0.1:8888"
-token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6Indlc2xleWJlbmljaW80QGdtYWlsLmNvbSIsImV4cCI6MTY0NzkxMjYzMCwiZW1haWwiOiJ3ZXNsZXliZW5pY2lvNEBnbWFpbC5jb20iLCJvcmlnX2lhdCI6MTY0NzczOTgzMH0.BEIaAlmAuGv6mg7eTaRK5RUH07NJR-z7kAOlIEFToQk"
+token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6Indlc2xleWJlbmljaW81QGdtYWlsLmNvbSIsImV4cCI6MTY0OTY4NDQzNywiZW1haWwiOiJ3ZXNsZXliZW5pY2lvNUBnbWFpbC5jb20iLCJvcmlnX2lhdCI6MTY0OTUxMTYzN30.4upc-X0sP-_lM5exKUFX30CX-7LjMscSAGzkyq_KcJY"
 
 if __name__ == '__main__':
     sio.connect(url,namespaces=['/row'], auth=token)
@@ -44,8 +44,8 @@ if __name__ == '__main__':
             sio.emit("set_location",{"coordinate":{"latitude": 0,"longitude": 0}}, namespace="/row")
             # sio.emit("send_notify",{"coordinate":{"latitude": 0,"longitude": 0}}, namespace="/row")
             time.sleep(5)
-        except Exception:
-            print("reconnectando")
+        except Exception as ex:
+            print("reconnectando",ex)
             try:
                 sio.connect(url, namespaces=['/row'],auth=token)
             except:

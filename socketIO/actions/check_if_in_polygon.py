@@ -6,6 +6,16 @@ import math
 from django.core import serializers as djserializers
 from api.components.admin import serializers
 
+def measure(lat1,lon1,lat2,lon2):
+    R = 6378.137 #Radius of Earth in KM
+    dLat = lat2 * math.pi / 180 - lat1 * math.pi / 180
+    dLon = lon2 * math.pi / 180 - lon1 * math.pi / 180
+    a = math.sin(dLat/2) * math.sin(dLat/2) + math.cos(lat1 * math.pi / 180) * math.cos(lat2 * math.pi / 180) *math.sin(dLon/2) * math.sin(dLon/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = R * c
+    return d * 1000 #meters
+
+    
 
 def CHECK_IF_IN_POLYGON(user:models.User,params = None):
     """
@@ -25,9 +35,10 @@ def CHECK_IF_IN_POLYGON(user:models.User,params = None):
         area = Polygon(point.convert_local_in_points())
         centroid = area.centroid
         
-        distance = math.dist(centroid,(user.last_position.get('latitude'),user.last_position.get('longitude')))
-
         
+        # distance = math.dist(centroid,(user.last_position.get('latitude'),user.last_position.get('longitude')))
+        distance = measure(centroid[0],centroid[1],user.last_position.get('latitude'),user.last_position.get('longitude'))
+        print(distance)
         # prepara o poligono
         area = area.prepared
         

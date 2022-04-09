@@ -40,6 +40,7 @@ class RowControl(socketio.Namespace):
                 self.emit('row_update', {"status": 200, "data": res},room=session.get("point"))
             self.emit('location_updated', {"status": 200, "data": res})
         except Exception as ex:
+            logging.error(ex)
             models.HistoricWebsocket.objects.create(user=session.get("user"),sid=sid,point=session.get("point"),action=str(ex))
 
     def on_disconnect(self, sid):
