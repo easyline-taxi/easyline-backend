@@ -38,7 +38,6 @@ def CHECK_IF_IN_POLYGON(user:models.User,params = None):
         
         # distance = math.dist(centroid,(user.last_position.get('latitude'),user.last_position.get('longitude')))
         distance = measure(centroid[0],centroid[1],user.last_position.get('latitude'),user.last_position.get('longitude'))
-        print(distance)
         # prepara o poligono
         area = area.prepared
         

@@ -15,8 +15,8 @@ class RowControl(socketio.Namespace):
         res = api_models.Token.objects.filter(key=auth).first()
         user = authentication_socket.auth_socket(sid,auth)
         if user:
-            self.save_session(sid, {'user': res.user,'point':res.user.point_id})
-            self.enter_room(sid, int(res.user.point_id))
+            self.save_session(sid, {'user': res.user,'point':res.user.point_id,'room':str(res.user.cpf)+"_"+str(res.user.point_id)})
+            self.enter_room(sid, str(res.user.cpf)+"_"+str(res.user.point_id))
             print("Connected: ",sid)
         
     def on_send_notify(self, sid, data):
@@ -27,7 +27,7 @@ class RowControl(socketio.Namespace):
         print("ON SEND NOTIFY :",user)
         
         models.HistoricWebsocket.objects.create(user=session.get("user"),sid=sid,point=session.get("point"),action="row_update",complement=data)
-        self.emit('row_update', {"status": 200},room=session.get("point"))
+        self.emit('row_update', {"status": 200},room=session.get("room"))
         
         
     def on_set_location(self, sid, data):
@@ -37,7 +37,7 @@ class RowControl(socketio.Namespace):
             res = SET_LOCALE(session.get("user"),data)
             if res.get("response").get("update"):
                 models.HistoricWebsocket.objects.create(user=session.get("user"),sid=sid,point=session.get("point"),action="row_update",complement=data)
-                self.emit('row_update', {"status": 200, "data": res},room=session.get("point"))
+                self.emit('row_update', {"status": 200, "data": res},room=session.get("room"))
             self.emit('location_updated', {"status": 200, "data": res})
         except Exception as ex:
             logging.error(ex)
