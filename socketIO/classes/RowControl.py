@@ -48,7 +48,7 @@ class RowControl(socketio.Namespace):
         session = self.get_session(sid)
         if session.get("user"):
             models.ClientWebsocket.objects.filter(user=session.get("user"),sid=sid).delete()
-            self.leave_room(sid, int(session.get("point")))
+            self.leave_room(sid, session.get("room"))
 
     
         

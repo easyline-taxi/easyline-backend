@@ -13,8 +13,8 @@ class PushNotification(socketio.Namespace):
         res = api_models.Token.objects.filter(key=auth).first()
         user = authentication_socket.auth_socket(sid,auth)
         if user:
-            self.save_session(sid, {'user': res.user,'point':res.user.point_id})
-            self.enter_room(sid, int(res.user.point_id))
+            self.save_session(sid, {'user': res.user,'point':res.user.point_id,'room':str(res.user.cpf)+"_"+str(res.user.point_id)})
+            self.enter_room(sid, str(res.user.cpf)+"_"+str(res.user.point_id))
             print("Connected Notifications: ",sid)
     
     def on_send_notify(self, sid, data):
@@ -23,13 +23,13 @@ class PushNotification(socketio.Namespace):
         user = session.get("user")
         user.refresh_from_db()
         models.HistoricWebsocket.objects.create(user=session.get("user"),sid=sid,point=session.get("point"),action="notification_update",complement=data)
-        self.emit('notification_update', {"status": 200},room=session.get("point"))
+        self.emit('notification_update', {"status": 200},room=session.get("room"))
     
     def on_disconnect(self, sid):
         print("Disconnected Notifications: ",sid)
         session = self.get_session(sid)
         if session.get("user"):
             models.ClientWebsocket.objects.filter(user=session.get("user"),sid=sid).delete()
-            self.leave_room(sid, int(session.get("point")))
+            self.leave_room(sid, session.get("room"))
 
     
